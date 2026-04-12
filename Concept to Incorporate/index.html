@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LinkTok</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #09090b;
+      color: #fafafa;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+
+    /* ─── CSS Variables ──────────────────────────────────────────────────── */
+    :root {
+      --orange: #f97316;
+      --orange-dim: #ea580c;
+      --orange-glow: rgba(249, 115, 22, 0.15);
+      --bg: #09090b;
+      --bg-card: #18181b;
+      --bg-card2: #1c1c1f;
+      --bg-overlay: rgba(9, 9, 11, 0.85);
+      --border: rgba(255,255,255,0.08);
+      --border-orange: rgba(249, 115, 22, 0.35);
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --text-dim: #52525b;
+      --red: #ef4444;
+      --green: #22c55e;
+      --nav-h: 64px;
+      --header-h: 56px;
+    }
+
+    /* ─── Layout Shell ───────────────────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────────────── */
+    #header {
+      height: var(--header-h);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      z-index: 10;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .logo span { color: var(--orange); }
+    .header-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ─── Views ──────────────────────────────────────────────────────────── */
+    .view {
+      flex: 1;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+    .view.active { display: flex; }
+
+    /* ─── Bottom Nav ─────────────────────────────────────────────────────── */
+    #nav {
+      height: var(--nav-h);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      z-index: 10;
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 0;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: color 0.2s;
+      border: none;
+      background: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .nav-btn.active { color: var(--orange); }
+    .nav-btn svg { width: 22px; height: 22px; }
+    .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    /* ─── Feed View ──────────────────────────────────────────────────────── */
+    #feed-view {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Hint arrows */
+    .feed-hint {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 2;
+    }
+    .feed-hint.top { top: 12px; }
+    .feed-hint.bottom { bottom: 12px; }
+    .feed-hint.visible { opacity: 1; }
+    .feed-hint svg { width: 16px; height: 16px; }
+
+    /* Delete / Options indicators */
+    .swipe-indicator {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .swipe-indicator.left { left: 24px; color: var(--red); }
+    .swipe-indicator.right { right: 24px; color: var(--orange); }
+    .swipe-indicator svg { width: 28px; height: 28px; }
+
+    /* Empty state */
+    #feed-empty {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 40px;
+    }
+    #feed-empty.visible { display: flex; }
+    #feed-empty svg { width: 56px; height: 56px; opacity: 0.3; }
+    #feed-empty h3 { font-size: 18px; font-weight: 700; color: var(--text); }
+    #feed-empty p { font-size: 14px; line-height: 1.6; }
+    #feed-empty .empty-cta {
+      margin-top: 8px;
+      padding: 12px 24px;
+      background: var(--orange);
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Card stack */
+    #card-stack {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ─── Link Card ──────────────────────────────────────────────────────── */
+    .link-card {
+      position: absolute;
+      width: calc(100% - 32px);
+      max-width: 420px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      cursor: grab;
+      user-select: none;
+      will-change: transform;
+      transition: box-shadow 0.2s;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .link-card:active { cursor: grabbing; }
+    .link-card.is-back {
+      transform: scale(0.95) translateY(20px);
+      filter: brightness(0.7);
+      pointer-events: none;
+    }
+    .link-card.is-back2 {
+      transform: scale(0.90) translateY(40px);
+      filter: brightness(0.5);
+      pointer-events: none;
+    }
+    .link-card.animating {
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+    }
+
+    /* Card image */
+    .card-image {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      display: block;
+      background: var(--bg-card2);
+    }
+    .card-image-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #18181b 0%, #27272a 50%, #18181b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-image-placeholder svg { width: 40px; height: 40px; opacity: 0.15; }
+
+    /* Card body */
+    .card-body {
+      padding: 18px 18px 14px;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .card-favicon {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      object-fit: contain;
+    }
+    .card-source {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--orange);
+    }
+    .card-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-dim); }
+    .card-date {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .card-category {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .card-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: var(--orange-glow);
+      color: var(--orange);
+      border: 1px solid var(--border-orange);
+    }
+
+    /* Card actions */
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+    .card-action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 9px 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .card-action-btn:hover, .card-action-btn:active {
+      background: rgba(255,255,255,0.08);
+    }
+    .card-action-btn.fav-active {
+      color: #fbbf24;
+      border-color: rgba(251, 191, 36, 0.3);
+      background: rgba(251, 191, 36, 0.08);
+    }
+    .card-action-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* Swipe tint overlay on card */
+    .card-tint {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 20px;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .card-tint.red { background: rgba(239, 68, 68, 0.12); opacity: 1; }
+    .card-tint.orange { background: rgba(249, 115, 22, 0.12); opacity: 1; }
+
+    /* Loading skeleton on card */
+    .card-skeleton .card-image-placeholder { animation: shimmer 1.5s infinite; }
+    .skeleton-line {
+      height: 14px;
+      border-radius: 6px;
+      background: var(--bg-card2);
+      animation: shimmer 1.5s infinite;
+      margin-bottom: 8px;
+    }
+    .skeleton-line.short { width: 60%; }
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .card-skeleton .card-image-placeholder,
+    .skeleton-line {
+      background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.5s infinite linear;
+    }
+
+    /* ─── Options Drawer ─────────────────────────────────────────────────── */
+    #options-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: calc(var(--header-h) + 12px) 0 calc(var(--nav-h) + 12px);
+    }
+    #options-overlay.open { display: flex; }
+
+    .options-card {
+      margin: 0 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .options-header {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .options-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .options-url {
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .options-list { padding: 8px 0; }
+    .options-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .options-item:hover, .options-item:active { background: rgba(255,255,255,0.05); }
+    .options-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .options-item.danger { color: var(--red); }
+    .options-item.accent { color: var(--orange); }
+    .options-close {
+      margin: 8px 16px 0;
+      padding: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    /* ─── Tag Input Overlay ──────────────────────────────────────────────── */
+    #tag-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-overlay);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 60;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 0 calc(var(--nav-h) + 12px);
+    }
+    #tag-overlay.open { display: flex; }
+    .tag-panel {
+      margin: 0 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+    }
+    .tag-panel h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .tag-input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .tag-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .tag-input:focus { border-color: var(--orange); }
+    .tag-add-btn {
+      padding: 10px 16px;
+      background: var(--orange);
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .tag-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tag-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: var(--orange-glow);
+      color: var(--orange);
+      border: 1px solid var(--border-orange);
+      cursor: pointer;
+    }
+    .tag-chip .remove { font-size: 14px; line-height: 1; }
+    .tag-done {
+      width: 100%;
+      padding: 12px;
+      background: var(--orange);
+      color: #000;
+      font-weight: 700;
+      font-size: 15px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ─── Library View ───────────────────────────────────────────────────── */
+    #library-view {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+    }
+    .library-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .library-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .library-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      margin-bottom: 16px;
+      padding-bottom: 2px;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .filter-chip.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #000;
+    }
+
+    .library-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .library-item:hover, .library-item:active { border-color: var(--border-orange); }
+    .library-thumb {
+      width: 64px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg-card2);
+    }
+    .library-thumb-placeholder {
+      width: 64px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--bg-card2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .library-thumb-placeholder svg { width: 20px; height: 20px; opacity: 0.2; }
+    .library-info { flex: 1; min-width: 0; }
+    .library-source {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 4px;
+    }
+    .library-item-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .library-item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .library-item-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--orange-glow);
+      color: var(--orange);
+      border: 1px solid var(--border-orange);
+    }
+    .library-open-btn {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .library-open-btn svg { width: 16px; height: 16px; }
+
+    .library-empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .library-empty svg { width: 48px; height: 48px; opacity: 0.2; }
+    .library-empty h3 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .library-empty p { font-size: 13px; }
+
+    /* ─── Add Links View ─────────────────────────────────────────────────── */
+    #add-view {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 16px;
+    }
+    .add-section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .add-section-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .add-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .add-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .add-card-title svg { width: 16px; height: 16px; color: var(--orange); }
+
+    .url-textarea {
+      width: 100%;
+      min-height: 100px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      outline: none;
+      line-height: 1.5;
+    }
+    .url-textarea:focus { border-color: var(--orange); }
+    .url-textarea::placeholder { color: var(--text-dim); }
+
+    .add-btn {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      background: var(--orange);
+      color: #000;
+      font-weight: 800;
+      font-size: 15px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .add-btn:hover { background: var(--orange-dim); }
+    .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .add-btn svg { width: 18px; height: 18px; }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--orange);
+      background: var(--orange-glow);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-zone svg { width: 28px; height: 28px; color: var(--text-dim); margin-bottom: 8px; }
+    .upload-zone p { font-size: 13px; color: var(--text-muted); }
+    .upload-zone strong { color: var(--orange); }
+
+    /* Progress / status */
+    #add-progress {
+      margin-top: 14px;
+      display: none;
+    }
+    #add-progress.visible { display: block; }
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--bg-card2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .progress-log {
+      margin-top: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+    .log-ok { color: var(--green); }
+    .log-err { color: var(--red); }
+    .log-info { color: var(--text-muted); }
+
+    /* ─── Toast ──────────────────────────────────────────────────────────── */
+    #toast {
+      position: absolute;
+      bottom: calc(var(--nav-h) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 30px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── Stop Import Button ─────────────────────────────────────────────── */
+    .stop-import-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 8px;
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: none;
+    }
+    .stop-import-btn.visible { display: block; }
+    .stop-import-btn:hover { background: rgba(239,68,68,0.08); }
+
+    /* ─── Import Action Row ───────────────────────────────────────────────── */
+    .import-action-row {
+      display: none;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .import-action-row.visible { display: flex; }
+    .refine-import-btn {
+      flex: 0 0 auto;
+      padding: 13px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .refine-import-btn:hover { background: rgba(255,255,255,0.06); }
+
+    /* ─── Refine Import Overlay ──────────────────────────────────────────── */
+    #refine-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+    }
+    #refine-overlay.open { display: flex; }
+    .refine-hdr {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .refine-hdr-title { font-size: 16px; font-weight: 800; }
+    .refine-hdr-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    #refine-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .refine-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 12px 20px 6px;
+    }
+    .refine-domain-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .refine-domain-row:hover, .refine-domain-row:active { background: rgba(255,255,255,0.03); }
+    .refine-check {
+      width: 20px; height: 20px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .refine-check.on {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+    .refine-check.on::after {
+      content: '';
+      width: 5px; height: 9px;
+      border: 2px solid #000;
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+      display: block;
+    }
+    .refine-domain-info { flex: 1; min-width: 0; }
+    .refine-domain-name { font-size: 13px; font-weight: 600; }
+    .refine-domain-cnt { font-size: 11px; color: var(--text-muted); }
+    .refine-divider { height: 1px; background: var(--border); margin: 0 20px; }
+    .refine-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .refine-cancel-btn {
+      padding: 13px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+    }
+
+    /* ─── Queue List View ─────────────────────────────────────────────────── */
+    #queue-list-view {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+    }
+    .qlist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .qlist-title { font-size: 18px; font-weight: 800; }
+    .qlist-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .qlist-empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .qlist-empty svg { width: 48px; height: 48px; opacity: 0.2; }
+    .qlist-empty h3 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .qlist-empty p { font-size: 13px; }
+    .qlist-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+      transition: border-color 0.15s;
+    }
+    .qlist-item:hover { border-color: var(--border-orange); }
+    .qlist-thumb {
+      width: 56px; height: 42px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg-card2);
+    }
+    .qlist-thumb-ph {
+      width: 56px; height: 42px;
+      border-radius: 8px;
+      background: var(--bg-card2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qlist-thumb-ph svg { width: 18px; height: 18px; opacity: 0.15; }
+    .qlist-info { flex: 1; min-width: 0; }
+    .qlist-source {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 3px;
+    }
+    .qlist-item-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px; font-weight: 600; line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 3px;
+    }
+    .qlist-date { font-size: 10px; color: var(--text-dim); }
+    .qlist-btns { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+    .qlist-btn {
+      width: 30px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 7px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .qlist-btn.save { color: var(--orange); border-color: var(--border-orange); background: var(--orange-glow); }
+    .qlist-btn.del { color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05); }
+    .qlist-btn svg { width: 13px; height: 13px; }
+    .qlist-position {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      width: 22px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ─── Scrollbar ──────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ─── Responsive (desktop) ───────────────────────────────────────────── */
+    @media (min-width: 481px) {
+      #app {
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        box-shadow: 0 0 80px rgba(0,0,0,0.6);
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div id="header">
+    <div class="logo">Link<span>Tok</span></div>
+    <div class="header-count" id="queue-count">0 in queue</div>
+  </div>
+
+  <!-- ── Feed View ─────────────────────────────────────────── -->
+  <div id="feed-view" class="view active">
+    <div class="feed-hint top" id="hint-prev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+      PREV
+    </div>
+    <div class="feed-hint bottom" id="hint-next">
+      NEXT
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <div class="swipe-indicator left" id="swipe-delete">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      DELETE
+    </div>
+    <div class="swipe-indicator right" id="swipe-options">
+      OPTIONS
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </div>
+
+    <div id="card-stack"></div>
+
+    <div id="feed-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+      </svg>
+      <h3>Queue is clear</h3>
+      <p>Add links to start triaging your reading list.</p>
+      <button class="empty-cta" onclick="switchView('add')">Add Links</button>
+    </div>
+
+    <!-- Options overlay (inside feed-view for stacking context) -->
+    <div id="options-overlay">
+      <div class="options-card">
+        <div class="options-header">
+          <div class="options-title" id="options-title"></div>
+          <div class="options-url" id="options-url"></div>
+        </div>
+        <div class="options-list">
+          <div class="options-item accent" id="opt-later">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-4-7 4V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            Save to View Later
+          </div>
+          <div class="options-item" id="opt-fav">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="opt-fav-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Favorite
+          </div>
+          <div class="options-item" id="opt-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Add Tag
+          </div>
+          <div class="options-item" id="opt-defer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Defer
+          </div>
+          <div class="options-item" id="opt-open">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open Original
+          </div>
+          <div class="options-item danger" id="opt-delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Delete
+          </div>
+        </div>
+      </div>
+      <div class="options-close" id="opt-close">Cancel</div>
+    </div>
+
+    <!-- Tag overlay -->
+    <div id="tag-overlay">
+      <div class="tag-panel">
+        <h3>Add Tags</h3>
+        <div class="tag-input-row">
+          <input class="tag-input" id="tag-input" type="text" placeholder="Enter a tag..." />
+          <button class="tag-add-btn" id="tag-add-btn">Add</button>
+        </div>
+        <div class="tag-chips" id="tag-chips"></div>
+        <button class="tag-done" id="tag-done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Library View ───────────────────────────────────────── -->
+  <div id="library-view" class="view">
+    <div style="padding: 16px 16px 0;">
+      <div class="library-header">
+        <div class="library-title">View Later</div>
+        <div class="library-count" id="library-count">0 saved</div>
+      </div>
+      <div class="filter-row" id="filter-row">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="favorites">★ Favorites</button>
+        <button class="filter-chip" data-filter="deferred">Deferred</button>
+      </div>
+    </div>
+    <div id="library-list" style="padding: 0 16px 16px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch;"></div>
+  </div>
+
+  <!-- ── Add View ───────────────────────────────────────────── -->
+  <div id="add-view" class="view">
+    <div class="add-section-title">Add Links</div>
+    <div class="add-section-sub">Paste URLs one per line, or upload a browser bookmark export.</div>
+
+    <div class="add-card">
+      <div class="add-card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        Paste URLs
+      </div>
+      <textarea class="url-textarea" id="url-input" placeholder="https://example.com/article&#10;https://another-site.com/post&#10;..."></textarea>
+      <button class="add-btn" id="add-url-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add to Queue
+      </button>
+    </div>
+
+    <div class="add-card">
+      <div class="add-card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import Bookmarks
+      </div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="bookmark-file" accept=".html,.htm" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>Drop your bookmarks HTML file here<br/>or <strong>click to browse</strong></p>
+      </div>
+      <div id="bookmark-preview" style="display:none; margin-top:12px;"></div>
+      <div class="import-action-row" id="import-action-row">
+        <button class="refine-import-btn" id="refine-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          Refine
+        </button>
+        <button class="add-btn" id="import-btn" style="flex:1;margin-top:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Import Articles
+        </button>
+      </div>
+    </div>
+
+    <div id="add-progress">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+      <div class="progress-text" id="progress-text">Processing...</div>
+      <div class="progress-log" id="progress-log"></div>
+      <button class="stop-import-btn" id="stop-import-btn">✕ Stop Import</button>
+    </div>
+  </div>
+
+  <!-- ── Queue List View ──────────────────────────────────────── -->
+  <div id="queue-list-view" class="view">
+    <div class="qlist-header">
+      <div class="qlist-title">Queue</div>
+      <div class="qlist-count" id="qlist-count">0 items</div>
+    </div>
+    <div id="qlist-body"></div>
+  </div>
+
+  <!-- ── Refine Import Overlay ─────────────────────────────────── -->
+  <div id="refine-overlay">
+    <div class="refine-hdr">
+      <div class="refine-hdr-title">Refine Import</div>
+      <div class="refine-hdr-count" id="refine-hdr-count">0 selected</div>
+    </div>
+    <div id="refine-list"></div>
+    <div class="refine-footer">
+      <button class="refine-cancel-btn" id="refine-cancel">Cancel</button>
+      <button class="add-btn" id="refine-confirm" style="flex:1;margin-top:0;">Import 0 Articles</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav id="nav">
+    <button class="nav-btn active" data-view="feed" onclick="switchView('feed')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span class="nav-label">Feed</span>
+    </button>
+    <button class="nav-btn" data-view="library" onclick="switchView('library')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21l-7-4-7 4V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+      </svg>
+      <span class="nav-label">Saved</span>
+    </button>
+    <button class="nav-btn" data-view="add" onclick="switchView('add')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      <span class="nav-label">Add</span>
+    </button>
+    <button class="nav-btn" data-view="queue-list" onclick="switchView('queue-list')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span class="nav-label">Queue</span>
+    </button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  LinkTok — Core App
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DB_KEY = 'linktok_v1';
+
+// ─── Data store ───────────────────────────────────────────────────────────
+let store = {
+  queue: [],     // unreviewed items (feed)
+  saved: [],     // view later
+  deferred: [],  // come back later
+};
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) store = JSON.parse(raw);
+  } catch(e) {}
+}
+
+function saveStore() {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(store)); } catch(e) {}
+}
+
+loadStore();
+
+// ─── Utilities ────────────────────────────────────────────────────────────
+function uuid() {
+  return 'lt_' + Math.random().toString(36).slice(2, 11) + Date.now().toString(36);
+}
+
+function friendlyDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return 'just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+  if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function hostname(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
+}
+
+function showToast(msg, duration = 2000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ─── View Switcher ────────────────────────────────────────────────────────
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(name + '-view').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+  if (name === 'library') renderLibrary();
+  if (name === 'feed') renderFeed();
+  if (name === 'queue-list') renderQueueList();
+}
+
+// ─── Metadata Fetching ────────────────────────────────────────────────────
+async function fetchMeta(url) {
+  try {
+    const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}&palette=false`, {
+      signal: AbortSignal.timeout(8000)
+    });
+    const json = await res.json();
+    if (json.status === 'success' && json.data) {
+      const d = json.data;
+      return {
+        title: d.title || hostname(url),
+        description: d.description || '',
+        image: d.image?.url || d.logo?.url || null,
+        source: d.publisher || hostname(url),
+        author: d.author || null,
+        favicon: `https://www.google.com/s2/favicons?domain=${hostname(url)}&sz=32`,
+        category: classifyUrl(url, d),
+      };
+    }
+  } catch(e) {}
+  // Fallback
+  return {
+    title: hostname(url),
+    description: '',
+    image: null,
+    source: hostname(url),
+    author: null,
+    favicon: `https://www.google.com/s2/favicons?domain=${hostname(url)}&sz=32`,
+    category: classifyUrl(url, {}),
+  };
+}
+
+function classifyUrl(url, meta) {
+  const u = url.toLowerCase();
+  const h = hostname(url);
+  const UTIL = ['mail.', 'drive.', 'docs.', 'sheets.', 'calendar.', 'admin', 'dashboard', 'login', 'signin', 'account', 'console.', 'app.', 'portal'];
+  const NEWS = ['nytimes', 'wsj.com', 'bbc', 'reuters', 'theguardian', 'washingtonpost', 'ft.com', 'bloomberg', 'apnews', 'npr'];
+  const BLOG = ['medium.com', 'substack.com', 'ghost.io', 'wordpress', 'blogspot', 'beehiiv'];
+  const RESEARCH = ['arxiv', 'ssrn', 'scholar', 'pubmed', 'nature.com', 'science.org', 'jstor'];
+  if (UTIL.some(x => u.includes(x))) return 'Utility';
+  if (RESEARCH.some(x => h.includes(x))) return 'Research';
+  if (NEWS.some(x => h.includes(x))) return 'News';
+  if (BLOG.some(x => h.includes(x))) return 'Blog';
+  const path = (() => { try { return new URL(url).pathname; } catch { return ''; } })();
+  if (/\/(article|post|story|read|blog|news|opinion|essay|feature)\//i.test(path)) return 'Article';
+  if (/\d{4}\/\d{2}/.test(path)) return 'Article';
+  return 'Article';
+}
+
+// ─── Card Rendering ───────────────────────────────────────────────────────
+let currentIndex = 0;
+
+function renderFeed() {
+  const stack = document.getElementById('card-stack');
+  stack.innerHTML = '';
+  updateQueueCount();
+
+  if (store.queue.length === 0) {
+    document.getElementById('feed-empty').classList.add('visible');
+    document.getElementById('hint-prev').classList.remove('visible');
+    document.getElementById('hint-next').classList.remove('visible');
+    return;
+  }
+  document.getElementById('feed-empty').classList.remove('visible');
+
+  // Show top 3 cards (back cards for depth illusion)
+  const visible = store.queue.slice(0, 3);
+  visible.reverse().forEach((item, i) => {
+    const idx = visible.length - 1 - i;
+    const card = buildCard(item);
+    if (idx === 1) card.classList.add('is-back');
+    if (idx >= 2) card.classList.add('is-back2');
+    stack.appendChild(card);
+  });
+
+  // Hints
+  document.getElementById('hint-next').classList.toggle('visible', store.queue.length > 1);
+  document.getElementById('hint-prev').classList.remove('visible');
+
+  attachSwipe(stack.lastElementChild, store.queue[0]);
+}
+
+function buildCard(item) {
+  const card = document.createElement('div');
+  card.className = 'link-card';
+  card.dataset.id = item.id;
+
+  const tint = document.createElement('div');
+  tint.className = 'card-tint';
+  card.appendChild(tint);
+
+  // Image
+  if (item.image) {
+    const img = document.createElement('img');
+    img.className = 'card-image';
+    img.src = item.image;
+    img.alt = '';
+    img.onerror = () => { img.style.display = 'none'; };
+    card.appendChild(img);
+  } else {
+    const ph = document.createElement('div');
+    ph.className = 'card-image-placeholder';
+    ph.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4 4 4-8 4 4"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>`;
+    card.appendChild(ph);
+  }
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  // Meta row
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  if (item.favicon) {
+    const fi = document.createElement('img');
+    fi.className = 'card-favicon';
+    fi.src = item.favicon;
+    fi.onerror = () => fi.remove();
+    meta.appendChild(fi);
+  }
+  const src = document.createElement('div');
+  src.className = 'card-source';
+  src.textContent = item.source || hostname(item.url);
+  meta.appendChild(src);
+
+  const dot = document.createElement('div');
+  dot.className = 'card-dot';
+  meta.appendChild(dot);
+
+  const date = document.createElement('div');
+  date.className = 'card-date';
+  date.textContent = friendlyDate(item.addedAt);
+  meta.appendChild(date);
+
+  if (item.category) {
+    const cat = document.createElement('div');
+    cat.className = 'card-category';
+    cat.textContent = item.category;
+    meta.appendChild(cat);
+  }
+  body.appendChild(meta);
+
+  // Title
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = item.title || hostname(item.url);
+  body.appendChild(title);
+
+  // Description
+  if (item.description) {
+    const desc = document.createElement('div');
+    desc.className = 'card-desc';
+    desc.textContent = item.description;
+    body.appendChild(desc);
+  }
+
+  // Tags
+  if (item.tags && item.tags.length) {
+    const tags = document.createElement('div');
+    tags.className = 'card-tags';
+    item.tags.forEach(t => {
+      const chip = document.createElement('div');
+      chip.className = 'card-tag';
+      chip.textContent = t;
+      tags.appendChild(chip);
+    });
+    body.appendChild(tags);
+  }
+
+  // Actions
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+
+  const btnOpen = makeActionBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`, 'Open');
+  btnOpen.onclick = (e) => { e.stopPropagation(); window.open(item.url, '_blank'); };
+  actions.appendChild(btnOpen);
+
+  const btnFav = makeActionBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, 'Favorite', item.favorite ? 'fav-active' : '');
+  btnFav.onclick = (e) => { e.stopPropagation(); toggleFavorite(item.id); };
+  btnFav.id = 'card-fav-' + item.id;
+  actions.appendChild(btnFav);
+
+  const btnLater = makeActionBtn(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-4-7 4V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>`, 'Save');
+  btnLater.onclick = (e) => { e.stopPropagation(); saveForLater(item.id); };
+  actions.appendChild(btnLater);
+
+  body.appendChild(actions);
+  card.appendChild(body);
+
+  return card;
+}
+
+function makeActionBtn(iconHtml, label, extraClass = '') {
+  const btn = document.createElement('button');
+  btn.className = 'card-action-btn' + (extraClass ? ' ' + extraClass : '');
+  btn.innerHTML = iconHtml + `<span>${label}</span>`;
+  return btn;
+}
+
+// ─── Swipe Logic ──────────────────────────────────────────────────────────
+function attachSwipe(card, item) {
+  if (!card || !item) return;
+
+  let startX = 0, startY = 0, dx = 0, dy = 0;
+  let tracking = false;
+
+  const SWIPE_X = 90;
+  const SWIPE_Y = 70;
+
+  const tint = card.querySelector('.card-tint');
+  const indDel = document.getElementById('swipe-delete');
+  const indOpt = document.getElementById('swipe-options');
+
+  function onDown(e) {
+    // Don't track if clicking buttons
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX;
+    startY = pt.clientY;
+    dx = dy = 0;
+    tracking = true;
+    card.style.transition = 'none';
+  }
+
+  function onMove(e) {
+    if (!tracking) return;
+    const pt = e.touches ? e.touches[0] : e;
+    dx = pt.clientX - startX;
+    dy = pt.clientY - startY;
+
+    // Prefer horizontal or vertical based on initial direction
+    const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+    if (absDx > absDy) {
+      // horizontal swipe
+      e.preventDefault();
+      const rot = dx * 0.04;
+      card.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
+      const p = Math.min(Math.abs(dx) / SWIPE_X, 1);
+      if (dx < 0) {
+        tint.className = 'card-tint red';
+        indDel.style.opacity = p;
+        indOpt.style.opacity = 0;
+      } else {
+        tint.className = 'card-tint orange';
+        indOpt.style.opacity = p;
+        indDel.style.opacity = 0;
+      }
+    } else {
+      // vertical swipe — translate only
+      e.preventDefault();
+      card.style.transform = `translateY(${dy}px)`;
+      tint.className = 'card-tint';
+      indDel.style.opacity = 0;
+      indOpt.style.opacity = 0;
+    }
+  }
+
+  function onUp() {
+    if (!tracking) return;
+    tracking = false;
+    indDel.style.opacity = 0;
+    indOpt.style.opacity = 0;
+    tint.className = 'card-tint';
+
+    const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+    if (absDx > absDy && absDx > SWIPE_X) {
+      // horizontal threshold met
+      if (dx < 0) {
+        animateOut(card, 'left', () => deleteItem(item.id));
+      } else {
+        openOptions(item.id);
+        card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.transform = '';
+      }
+    } else if (absDy > absDx && absDy > SWIPE_Y) {
+      // vertical threshold met
+      if (dy < 0) {
+        animateOut(card, 'up', () => advanceQueue());
+      } else {
+        // swipe down - go back (noop in this version, just bounce)
+        card.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.transform = '';
+      }
+    } else {
+      // snap back
+      card.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      card.style.transform = '';
+    }
+  }
+
+  card.addEventListener('pointerdown', onDown, { passive: false });
+  card.addEventListener('pointermove', onMove, { passive: false });
+  card.addEventListener('pointerup', onUp);
+  card.addEventListener('pointercancel', onUp);
+}
+
+function animateOut(card, dir, callback) {
+  card.style.transition = 'transform 0.35s cubic-bezier(0.4, 0, 0.6, 1), opacity 0.35s';
+  const W = window.innerWidth;
+  if (dir === 'left') card.style.transform = `translateX(-${W * 1.5}px) rotate(-20deg)`;
+  if (dir === 'right') card.style.transform = `translateX(${W * 1.5}px) rotate(20deg)`;
+  if (dir === 'up') card.style.transform = `translateY(-${window.innerHeight}px)`;
+  card.style.opacity = '0';
+  setTimeout(callback, 300);
+}
+
+function advanceQueue() {
+  if (store.queue.length > 0) {
+    // Move current item to end (defer implicitly)
+    const item = store.queue.shift();
+    store.queue.push(item);
+    saveStore();
+    renderFeed();
+  }
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────
+function deleteItem(id) {
+  store.queue = store.queue.filter(x => x.id !== id);
+  saveStore();
+  renderFeed();
+  showToast('Deleted');
+}
+
+function saveForLater(id) {
+  const idx = store.queue.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const [item] = store.queue.splice(idx, 1);
+  item.savedAt = new Date().toISOString();
+  store.saved.unshift(item);
+  saveStore();
+  renderFeed();
+  showToast('Saved to View Later');
+}
+
+function toggleFavorite(id) {
+  // Check in queue
+  let item = store.queue.find(x => x.id === id) || store.saved.find(x => x.id === id);
+  if (!item) return;
+  item.favorite = !item.favorite;
+  saveStore();
+  const btn = document.getElementById('card-fav-' + id);
+  if (btn) btn.classList.toggle('fav-active', item.favorite);
+  // Update options panel icon
+  const icon = document.getElementById('opt-fav-icon');
+  if (icon) icon.style.fill = item.favorite ? '#fbbf24' : 'none';
+  const optFav = document.getElementById('opt-fav');
+  if (optFav) optFav.querySelector('svg').style.fill = item.favorite ? '#fbbf24' : 'none';
+  showToast(item.favorite ? 'Added to Favorites' : 'Removed from Favorites');
+}
+
+function deferItem(id) {
+  const idx = store.queue.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  const [item] = store.queue.splice(idx, 1);
+  item.deferredAt = new Date().toISOString();
+  item.status = 'deferred';
+  store.deferred.unshift(item);
+  saveStore();
+  renderFeed();
+  showToast('Deferred');
+}
+
+// ─── Options Panel ────────────────────────────────────────────────────────
+let optionsItemId = null;
+
+function openOptions(id) {
+  const item = store.queue.find(x => x.id === id);
+  if (!item) return;
+  optionsItemId = id;
+  document.getElementById('options-title').textContent = item.title || hostname(item.url);
+  document.getElementById('options-url').textContent = item.url;
+  const icon = document.getElementById('opt-fav-icon');
+  icon.style.fill = item.favorite ? '#fbbf24' : 'none';
+  document.getElementById('options-overlay').classList.add('open');
+}
+
+function closeOptions() {
+  document.getElementById('options-overlay').classList.remove('open');
+  optionsItemId = null;
+}
+
+document.getElementById('opt-close').onclick = closeOptions;
+document.getElementById('options-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeOptions();
+});
+
+document.getElementById('opt-later').onclick = () => {
+  const id = optionsItemId;
+  closeOptions();
+  saveForLater(id);
+};
+document.getElementById('opt-fav').onclick = () => {
+  toggleFavorite(optionsItemId);
+};
+document.getElementById('opt-tag').onclick = () => {
+  closeOptions();
+  openTagPanel(optionsItemId);
+};
+document.getElementById('opt-defer').onclick = () => {
+  const id = optionsItemId;
+  closeOptions();
+  deferItem(id);
+};
+document.getElementById('opt-open').onclick = () => {
+  const item = store.queue.find(x => x.id === optionsItemId);
+  if (item) window.open(item.url, '_blank');
+  closeOptions();
+};
+document.getElementById('opt-delete').onclick = () => {
+  const id = optionsItemId;
+  closeOptions();
+  deleteItem(id);
+};
+
+// ─── Tag Panel ────────────────────────────────────────────────────────────
+let tagItemId = null;
+let pendingTags = [];
+
+function openTagPanel(id) {
+  const item = store.queue.find(x => x.id === id) || store.saved.find(x => x.id === id);
+  if (!item) return;
+  tagItemId = id;
+  pendingTags = [...(item.tags || [])];
+  document.getElementById('tag-input').value = '';
+  renderTagChips();
+  document.getElementById('tag-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('tag-input').focus(), 100);
+}
+
+function renderTagChips() {
+  const container = document.getElementById('tag-chips');
+  container.innerHTML = '';
+  pendingTags.forEach(tag => {
+    const chip = document.createElement('div');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${tag} <span class="remove">×</span>`;
+    chip.querySelector('.remove').onclick = () => {
+      pendingTags = pendingTags.filter(t => t !== tag);
+      renderTagChips();
+    };
+    container.appendChild(chip);
+  });
+}
+
+function addPendingTag() {
+  const input = document.getElementById('tag-input');
+  const val = input.value.trim().toLowerCase().replace(/[^a-z0-9\-_]/g, '');
+  if (val && !pendingTags.includes(val)) {
+    pendingTags.push(val);
+    renderTagChips();
+  }
+  input.value = '';
+  input.focus();
+}
+
+document.getElementById('tag-add-btn').onclick = addPendingTag;
+document.getElementById('tag-input').onkeydown = (e) => {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addPendingTag(); }
+};
+document.getElementById('tag-done').onclick = () => {
+  // Commit tags
+  const allItems = [...store.queue, ...store.saved, ...store.deferred];
+  const item = allItems.find(x => x.id === tagItemId);
+  if (item) {
+    item.tags = [...pendingTags];
+    saveStore();
+    if (store.queue[0]?.id === tagItemId) renderFeed();
+  }
+  document.getElementById('tag-overlay').classList.remove('open');
+  tagItemId = null;
+  showToast('Tags saved');
+};
+
+// ─── Queue Count ──────────────────────────────────────────────────────────
+function updateQueueCount() {
+  const n = store.queue.length;
+  document.getElementById('queue-count').textContent = n === 0 ? 'Empty' : `${n} in queue`;
+}
+
+// ─── Queue List Rendering ─────────────────────────────────────────────────
+function renderQueueList() {
+  const body = document.getElementById('qlist-body');
+  body.innerHTML = '';
+  const n = store.queue.length;
+  document.getElementById('qlist-count').textContent = `${n} item${n !== 1 ? 's' : ''}`;
+
+  if (n === 0) {
+    body.innerHTML = `
+      <div class="qlist-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        <h3>Queue is clear</h3>
+        <p>Add links or import bookmarks to fill it up.</p>
+      </div>`;
+    return;
+  }
+
+  store.queue.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'qlist-item';
+    el.innerHTML = `
+      <div class="qlist-position">${idx + 1}</div>
+      ${item.image
+        ? `<img class="qlist-thumb" src="${item.image}" alt="" onerror="this.style.display='none'" />`
+        : `<div class="qlist-thumb-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4 4 4-8 4 4"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg></div>`}
+      <div class="qlist-info">
+        <div class="qlist-source">${item.source || hostname(item.url)}</div>
+        <div class="qlist-item-title">${item.title || hostname(item.url)}</div>
+        <div class="qlist-date">${friendlyDate(item.addedAt)}</div>
+      </div>
+      <div class="qlist-btns">
+        <button class="qlist-btn" title="Open" onclick="window.open('${item.url.replace(/'/g,"\\'")}','_blank')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </button>
+        <button class="qlist-btn save" title="Save for later" data-id="${item.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-4-7 4V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        </button>
+        <button class="qlist-btn del" title="Delete" data-id="${item.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    `;
+    el.querySelector('.qlist-btn.save').onclick = (e) => {
+      e.stopPropagation();
+      saveForLater(item.id);
+      renderQueueList();
+    };
+    el.querySelector('.qlist-btn.del').onclick = (e) => {
+      e.stopPropagation();
+      deleteItem(item.id);
+      renderQueueList();
+    };
+    body.appendChild(el);
+  });
+}
+
+// ─── Library Rendering ────────────────────────────────────────────────────
+let libraryFilter = 'all';
+
+document.getElementById('filter-row').addEventListener('click', (e) => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  libraryFilter = chip.dataset.filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c === chip));
+  renderLibrary();
+});
+
+function renderLibrary() {
+  let items = [];
+  if (libraryFilter === 'all') items = [...store.saved, ...store.deferred];
+  else if (libraryFilter === 'favorites') items = [...store.saved, ...store.deferred].filter(x => x.favorite);
+  else if (libraryFilter === 'deferred') items = [...store.deferred];
+
+  // Sort by savedAt / addedAt
+  items.sort((a, b) => new Date(b.savedAt || b.addedAt) - new Date(a.savedAt || a.addedAt));
+
+  const list = document.getElementById('library-list');
+  list.innerHTML = '';
+
+  const total = store.saved.length + store.deferred.length;
+  document.getElementById('library-count').textContent = `${total} saved`;
+
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="library-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M19 21l-7-4-7 4V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+        </svg>
+        <h3>Nothing here yet</h3>
+        <p>Save links from the feed to build your library.</p>
+      </div>`;
+    return;
+  }
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'library-item';
+    el.innerHTML = `
+      ${item.image
+        ? `<img class="library-thumb" src="${item.image}" alt="" onerror="this.style.display='none'" />`
+        : `<div class="library-thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4 4 4-8 4 4"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg></div>`}
+      <div class="library-info">
+        <div class="library-source">${item.source || hostname(item.url)}</div>
+        <div class="library-item-title">${item.title || hostname(item.url)}</div>
+        ${item.tags && item.tags.length ? `<div class="library-item-tags">${item.tags.map(t => `<span class="library-item-tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="library-open-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>
+    `;
+    el.querySelector('.library-open-btn').onclick = (e) => { e.stopPropagation(); window.open(item.url, '_blank'); };
+    el.onclick = () => window.open(item.url, '_blank');
+    list.appendChild(el);
+  });
+}
+
+// ─── URL Adding ───────────────────────────────────────────────────────────
+document.getElementById('add-url-btn').onclick = async () => {
+  const raw = document.getElementById('url-input').value.trim();
+  if (!raw) return;
+
+  // Parse URLs - handle various separators
+  const lines = raw.split(/[\n,\s]+/).map(l => l.trim()).filter(Boolean);
+  const urls = lines.filter(l => {
+    try { new URL(l); return true; } catch { return false; }
+  });
+
+  if (urls.length === 0) {
+    showToast('No valid URLs found');
+    return;
+  }
+
+  document.getElementById('url-input').value = '';
+  await processUrls(urls, 'Paste');
+};
+
+let importAborted = false;
+
+async function processUrls(urls, source = 'Paste') {
+  importAborted = false;
+  const btn = document.getElementById('add-url-btn');
+  btn.disabled = true;
+
+  const stopBtn = document.getElementById('stop-import-btn');
+  stopBtn.classList.add('visible');
+  stopBtn.onclick = () => { importAborted = true; stopBtn.textContent = 'Stopping…'; stopBtn.disabled = true; };
+
+  const progress = document.getElementById('add-progress');
+  const bar = document.getElementById('progress-bar');
+  const text = document.getElementById('progress-text');
+  const log = document.getElementById('progress-log');
+  progress.classList.add('visible');
+  log.innerHTML = '';
+
+  let added = 0;
+  for (let i = 0; i < urls.length; i++) {
+    if (importAborted) break;
+
+    const url = urls[i];
+    const pct = Math.round((i / urls.length) * 100);
+    bar.style.width = pct + '%';
+    text.textContent = `Fetching ${i+1} of ${urls.length}…`;
+
+    // Deduplicate
+    const allUrls = [...store.queue, ...store.saved, ...store.deferred].map(x => x.url);
+    if (allUrls.includes(url)) {
+      log.innerHTML += `<div class="log-info">⊘ Duplicate: ${hostname(url)}</div>`;
+      log.scrollTop = log.scrollHeight;
+      continue;
+    }
+
+    const meta = await fetchMeta(url);
+    const item = {
+      id: uuid(),
+      url,
+      title: meta.title,
+      description: meta.description,
+      image: meta.image,
+      source: meta.source,
+      author: meta.author,
+      favicon: meta.favicon,
+      category: meta.category,
+      tags: [],
+      favorite: false,
+      status: 'unreviewed',
+      addedAt: new Date().toISOString(),
+      originalSource: source,
+    };
+    store.queue.push(item);
+    added++;
+    log.innerHTML += `<div class="log-ok">✓ ${meta.title || hostname(url)}</div>`;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  bar.style.width = '100%';
+  const stoppedEarly = importAborted && added < urls.length;
+  text.textContent = stoppedEarly
+    ? `Stopped. Added ${added} of ${urls.length} links.`
+    : `Done! Added ${added} link${added !== 1 ? 's' : ''} to queue.`;
+
+  saveStore();
+  updateQueueCount();
+  btn.disabled = false;
+  stopBtn.classList.remove('visible');
+  stopBtn.textContent = '✕ Stop Import';
+  stopBtn.disabled = false;
+  showToast(`${added} link${added !== 1 ? 's' : ''} added`);
+
+  setTimeout(() => {
+    progress.classList.remove('visible');
+    switchView('feed');
+  }, 2000);
+}
+
+// ─── Bookmark Import ──────────────────────────────────────────────────────
+let parsedBookmarks = [];
+
+document.getElementById('bookmark-file').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => parseBookmarkHTML(e.target.result);
+  reader.readAsText(file);
+});
+
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => parseBookmarkHTML(ev.target.result);
+  reader.readAsText(file);
+});
+
+// Hostname-level exclusion patterns (non-article content)
+const UTIL_HOSTNAME = [
+  // Email & calendar
+  /^mail\./, /^webmail\./, /^smtp\./, /^imap\./,
+  /^(www\.)?gmail\.com$/, /^(www\.)?outlook\.(com|live|office)$/,
+  /^(www\.)?calendar\.google\.com$/, /^calendar\./,
+  // Productivity apps
+  /^(www\.)?drive\.google\.com$/, /^drive\./, /^docs\./,
+  /^(www\.)?sheets\./, /^(www\.)?notion\.so$/,
+  /^(www\.)?slack\.com$/, /^(www\.)?trello\.com$/,
+  /^(www\.)?asana\.com$/, /^(www\.)?monday\.com$/,
+  /^(www\.)?clickup\.com$/, /^(www\.)?basecamp\.com$/,
+  /^(www\.)?linear\.app$/, /^(www\.)?airtable\.com$/,
+  // Code & dev
+  /^github\.com$/, /^(www\.)?gitlab\.(com|io)$/,
+  /^(www\.)?bitbucket\.org$/, /^(www\.)?codepen\.io$/,
+  /^(www\.)?replit\.com$/, /^(www\.)?jsfiddle\.net$/,
+  // Video
+  /^(www\.)?youtube\.com$/, /^youtu\.be$/,
+  /^(www\.)?vimeo\.com$/, /^(www\.)?twitch\.tv$/,
+  /^(www\.)?tiktok\.com$/, /^(www\.)?dailymotion\.com$/,
+  // Social media
+  /^(www\.)?twitter\.com$/, /^(www\.)?x\.com$/,
+  /^(www\.)?instagram\.com$/, /^(www\.)?facebook\.com$/,
+  /^(www\.)?fb\.com$/, /^(www\.)?linkedin\.com$/,
+  /^(www\.)?pinterest\.(com|co\.\w+)$/, /^(www\.)?snapchat\.com$/,
+  /^(www\.)?threads\.net$/, /^(www\.)?reddit\.com$/,
+  // Shopping
+  /^(www\.)?amazon\.(com|co\.\w+|de|fr|ca|com\.au)$/,
+  /^(www\.)?ebay\.(com|co\.\w+)$/, /^(www\.)?etsy\.com$/,
+  /^(www\.)?walmart\.com$/, /^(www\.)?target\.com$/,
+  /^(www\.)?bestbuy\.com$/, /^(www\.)?wayfair\.com$/,
+  // Streaming & music
+  /^(www\.)?spotify\.com$/, /^(www\.)?soundcloud\.com$/,
+  /^(www\.)?netflix\.com$/, /^(www\.)?hulu\.com$/,
+  /^(www\.)?disneyplus\.com$/, /^(www\.)?hbomax\.com$/,
+  /^(www\.)?primevideo\.com$/, /^(www\.)?apple\.com$/,
+  /^(www\.)?pandora\.com$/,
+  // Maps & local
+  /^maps\.google\./, /^(www\.)?yelp\.com$/, /^(www\.)?tripadvisor\./,
+  /^(www\.)?doordash\.com$/, /^(www\.)?ubereats\.com$/,
+  // Design tools
+  /^(www\.)?figma\.com$/, /^(www\.)?canva\.com$/,
+  /^(www\.)?sketch\.com$/, /^(www\.)?invisionapp\.com$/,
+  // Cloud storage
+  /^(www\.)?dropbox\.com$/, /^(www\.)?box\.com$/,
+  /^(www\.)?icloud\.com$/, /^(www\.)?onedrive\.live\.com$/,
+  // Finance apps
+  /^(www\.)?paypal\.com$/, /^(www\.)?venmo\.com$/,
+  /^(www\.)?stripe\.com$/, /^(www\.)?robinhood\.com$/,
+  /^(www\.)?coinbase\.com$/,
+  // Auth / account pages
+  /^accounts\./, /^auth\./,
+];
+
+// URL-level patterns (path-based)
+const UTIL_PATH = [
+  /\/login[/?#]?$/i, /\/signin[/?#]?$/i, /\/sign-in[/?#]?$/i,
+  /\/logout/i, /\/register/i, /\/signup/i,
+  /\/admin\//i, /\/dashboard\//i, /\/console\//i, /\/portal\//i,
+  /\/account\//i, /\/settings\//i, /\/profile\//i,
+  /\/watch\?v=/i,          // YouTube video URLs
+  /\/status\/\d+/i,        // Twitter/X tweets
+];
+
+function isUtilUrl(url) {
+  try {
+    const u = new URL(url);
+    const h = u.hostname.replace(/^www\./, '');
+    const fullHost = u.hostname;
+    if (UTIL_HOSTNAME.some(p => p.test(fullHost))) return true;
+    if (UTIL_PATH.some(p => p.test(u.pathname + u.search))) return true;
+    // Legacy patterns
+    const legacyChecks = ['admin', 'dashboard', 'console.', 'portal', 'app.',
+      'slack.', 'notion.', 'trello', 'jira', 'localhost', '127.0.0.1'];
+    if (legacyChecks.some(x => h.includes(x) || url.includes(x))) return true;
+    return false;
+  } catch { return true; }
+}
+
+function isHomepageUrl(url) {
+  try {
+    const u = new URL(url);
+    const path = u.pathname;
+    return path === '/' || path === '';
+  } catch { return false; }
+}
+
+// Which domains are enabled in the refine overlay (hostname → bool)
+let refineDomainEnabled = {};
+
+function parseBookmarkHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const links = Array.from(doc.querySelectorAll('a[href]'));
+
+  parsedBookmarks = links
+    .map(a => ({
+      url: a.href,
+      title: a.textContent.trim() || a.href,
+      addDate: a.getAttribute('add_date'),
+      isUtil: isUtilUrl(a.href) || isHomepageUrl(a.href),
+    }))
+    .filter(b => {
+      try { const u = new URL(b.url); return ['http:', 'https:'].includes(u.protocol); }
+      catch { return false; }
+    });
+
+  const articles = parsedBookmarks.filter(b => !b.isUtil);
+  const utils = parsedBookmarks.filter(b => b.isUtil);
+
+  const preview = document.getElementById('bookmark-preview');
+  preview.style.display = 'block';
+
+  // Build a sample of what was filtered for transparency
+  const filteredSamples = utils.slice(0, 3).map(b => hostname(b.url)).join(', ');
+  const moreFiltered = utils.length > 3 ? ` +${utils.length - 3} more` : '';
+
+  preview.innerHTML = `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:1.9;">
+      <div style="font-weight:700;margin-bottom:4px;">${parsedBookmarks.length} bookmarks found</div>
+      <div style="color:var(--green)">✓ <strong>${articles.length}</strong> kept as reading content</div>
+      <div style="color:var(--text-dim)">⊘ <strong>${utils.length}</strong> filtered out${utils.length > 0 ? ` <span style="font-size:11px;">(${filteredSamples}${moreFiltered})</span>` : ''}</div>
+    </div>
+  `;
+
+  const actionRow = document.getElementById('import-action-row');
+  const importBtn = document.getElementById('import-btn');
+  if (articles.length > 0) {
+    actionRow.classList.add('visible');
+    importBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><polyline points="20 6 9 17 4 12"/></svg> Import ${articles.length} Articles`;
+  }
+}
+
+document.getElementById('import-btn').onclick = async () => {
+  const articles = parsedBookmarks.filter(b => !b.isUtil);
+  const urls = articles.map(b => b.url);
+  document.getElementById('import-action-row').classList.remove('visible');
+  document.getElementById('bookmark-preview').style.display = 'none';
+  await processUrls(urls, 'Bookmark');
+};
+
+document.getElementById('refine-btn').onclick = () => openRefineOverlay();
+
+function openRefineOverlay() {
+  const articles = parsedBookmarks.filter(b => !b.isUtil);
+
+  // Group by domain
+  const domainMap = {};
+  articles.forEach(b => {
+    const d = hostname(b.url);
+    if (!domainMap[d]) domainMap[d] = [];
+    domainMap[d].push(b);
+  });
+
+  // Initialize all domains as enabled
+  refineDomainEnabled = {};
+  Object.keys(domainMap).forEach(d => { refineDomainEnabled[d] = true; });
+
+  renderRefineList(domainMap);
+  document.getElementById('refine-overlay').classList.add('open');
+}
+
+function renderRefineList(domainMap) {
+  const list = document.getElementById('refine-list');
+  list.innerHTML = '';
+
+  const domains = Object.keys(domainMap).sort((a, b) => domainMap[b].length - domainMap[a].length);
+  let totalSelected = domains.reduce((n, d) => n + (refineDomainEnabled[d] ? domainMap[d].length : 0), 0);
+
+  document.getElementById('refine-hdr-count').textContent = `${totalSelected} selected`;
+  document.getElementById('refine-confirm').innerHTML =
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><polyline points="20 6 9 17 4 12"/></svg> Import ${totalSelected} Articles`;
+
+  const label = document.createElement('div');
+  label.className = 'refine-section-label';
+  label.textContent = `${domains.length} domains — uncheck to exclude`;
+  list.appendChild(label);
+
+  domains.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.className = 'refine-domain-row';
+
+    const check = document.createElement('div');
+    check.className = 'refine-check' + (refineDomainEnabled[d] ? ' on' : '');
+
+    const info = document.createElement('div');
+    info.className = 'refine-domain-info';
+    info.innerHTML = `<div class="refine-domain-name">${d}</div><div class="refine-domain-cnt">${domainMap[d].length} article${domainMap[d].length !== 1 ? 's' : ''}</div>`;
+
+    row.appendChild(check);
+    row.appendChild(info);
+    row.onclick = () => {
+      refineDomainEnabled[d] = !refineDomainEnabled[d];
+      renderRefineList(domainMap);
+    };
+
+    list.appendChild(row);
+    if (i < domains.length - 1) {
+      const div = document.createElement('div');
+      div.className = 'refine-divider';
+      list.appendChild(div);
+    }
+  });
+}
+
+document.getElementById('refine-cancel').onclick = () => {
+  document.getElementById('refine-overlay').classList.remove('open');
+};
+
+document.getElementById('refine-confirm').onclick = async () => {
+  const articles = parsedBookmarks.filter(b => !b.isUtil);
+  const urls = articles
+    .filter(b => refineDomainEnabled[hostname(b.url)])
+    .map(b => b.url);
+  document.getElementById('refine-overlay').classList.remove('open');
+  document.getElementById('import-action-row').classList.remove('visible');
+  document.getElementById('bookmark-preview').style.display = 'none';
+  await processUrls(urls, 'Bookmark');
+};
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+renderFeed();
+updateQueueCount();
+
+// Seed with demo data if empty
+if (store.queue.length === 0 && store.saved.length === 0) {
+  const demos = [
+    {
+      id: uuid(),
+      url: 'https://www.paulgraham.com/startupideas.html',
+      title: 'How to Get Startup Ideas',
+      description: 'The way to get startup ideas is not to try to think of startup ideas. It\'s to look for problems, preferably problems you have yourself.',
+      image: null,
+      source: 'Paul Graham',
+      favicon: 'https://www.google.com/s2/favicons?domain=paulgraham.com&sz=32',
+      category: 'Article',
+      tags: ['startups', 'ideas'],
+      favorite: false,
+      status: 'unreviewed',
+      addedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+    {
+      id: uuid(),
+      url: 'https://www.nytimes.com/2025/03/20/technology/ai-2025.html',
+      title: 'The AI Landscape in 2025: What\'s Changed and What Hasn\'t',
+      description: 'A deep look at how artificial intelligence has reshaped industries, daily life, and the economy over the past year.',
+      image: null,
+      source: 'New York Times',
+      favicon: 'https://www.google.com/s2/favicons?domain=nytimes.com&sz=32',
+      category: 'News',
+      tags: ['ai', 'tech'],
+      favorite: true,
+      status: 'unreviewed',
+      addedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    },
+    {
+      id: uuid(),
+      url: 'https://stratechery.com/2025/the-ai-transition/',
+      title: 'The AI Transition',
+      description: 'Every major technology transition has followed a similar pattern. Understanding where we are in the AI transition helps clarify what comes next.',
+      image: null,
+      source: 'Stratechery',
+      favicon: 'https://www.google.com/s2/favicons?domain=stratechery.com&sz=32',
+      category: 'Article',
+      tags: [],
+      favorite: false,
+      status: 'unreviewed',
+      addedAt: new Date(Date.now() - 3600000).toISOString(),
+    },
+  ];
+  store.queue = demos;
+  saveStore();
+  renderFeed();
+  updateQueueCount();
+}
+</script>
+</body>
+</html>
