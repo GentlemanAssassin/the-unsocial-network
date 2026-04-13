@@ -915,16 +915,13 @@
       <div class="undo-redo-bar">
         <button class="undo-redo-btn" id="undoBtn" disabled onclick="undo()">↩ Undo</button>
         <button class="undo-redo-btn" id="redoBtn" disabled onclick="redo()">Redo ↪</button>
-        <button class="tag-filter-btn" id="tagFilterBtn" onclick="openTagFilterModal()">🏷 Tags</button>
       </div>
       <div class="active-filters" id="activeFilters"></div>
       <div id="homeView" class="view active">
         <div class="sort-controls">
-          <button class="sort-btn active" data-sort="newest">Newest</button>
-          <button class="sort-btn" data-sort="oldest">Oldest</button>
-          <button class="sort-btn" data-sort="saved">Date Saved</button>
+          <button class="sort-btn active" id="dateSortBtn" onclick="toggleDateSort()">Newest</button>
           <button class="sort-btn" data-sort="shuffle">Shuffle</button>
-          <button class="sort-btn" data-sort="category">Category</button>
+          <button class="sort-btn" onclick="openTagFilterModal()">Tags</button>
         </div>
         <div class="cards-container" id="cardsContainer"></div>
       </div>
@@ -2262,7 +2259,22 @@
     function setSort(sortType) {
       currentSort = sortType;
       document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`[data-sort="${sortType}"]`).classList.add('active');
+      const matchBtn = document.querySelector(`[data-sort="${sortType}"]`);
+      if (matchBtn) matchBtn.classList.add('active');
+      renderHome();
+    }
+
+    function toggleDateSort() {
+      const btn = document.getElementById('dateSortBtn');
+      if (currentSort === 'newest') {
+        currentSort = 'oldest';
+        btn.textContent = 'Oldest';
+      } else {
+        currentSort = 'newest';
+        btn.textContent = 'Newest';
+      }
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       renderHome();
     }
 
@@ -2608,7 +2620,9 @@
     });
 
     document.querySelectorAll('.sort-btn').forEach(btn => {
-      btn.addEventListener('click', () => setSort(btn.dataset.sort));
+      if (btn.dataset.sort) {
+        btn.addEventListener('click', () => setSort(btn.dataset.sort));
+      }
     });
 
     document.getElementById('closeTagFilterModal').addEventListener('click', () => {
