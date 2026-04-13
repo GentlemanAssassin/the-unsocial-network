@@ -777,6 +777,10 @@
       padding: 6px 16px;
       flex-shrink: 0;
       border-bottom: 1px solid rgba(91, 156, 246, 0.06);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #0F1724;
     }
 
     .undo-redo-btn {
@@ -861,10 +865,14 @@
     }
 
     .active-filters {
-      display: flex;
+      display: none;
       gap: 6px;
       flex-wrap: wrap;
-      padding: 0 16px 8px;
+      padding: 4px 16px 8px;
+      position: sticky;
+      top: 37px;
+      z-index: 10;
+      background: #0F1724;
     }
 
     .active-filter-pill {
@@ -2318,12 +2326,14 @@
     }
 
     function openTagFilterModal() {
-      const allTags = new Set();
-      articles.forEach(a => a.tags.forEach(t => allTags.add(t)));
-      const sortedTags = Array.from(allTags).sort();
+      const tagCounts = {};
+      articles.forEach(a => {
+        if (!a.archived) a.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+      });
+      const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
       const container = document.getElementById('tagFilterList');
       container.innerHTML = sortedTags.map(tag =>
-        `<button class="tag-filter-chip ${activeTagFilters.has(tag) ? 'selected' : ''}" onclick="toggleTagFilter('${tag.replace(/'/g, "\\'")}')">${tag}</button>`
+        `<button class="tag-filter-chip ${activeTagFilters.has(tag) ? 'selected' : ''}" onclick="toggleTagFilter('${tag.replace(/'/g, "\\'")}')">${tag} <span style="opacity:0.5;font-size:11px;">(${tagCounts[tag]})</span></button>`
       ).join('');
       document.getElementById('tagFilterModal').classList.add('open');
     }
@@ -2355,8 +2365,10 @@
       if (!container) return;
       if (activeTagFilters.size === 0) {
         container.innerHTML = '';
+        container.style.display = 'none';
         return;
       }
+      container.style.display = 'flex';
       container.innerHTML = Array.from(activeTagFilters).map(tag =>
         `<span class="active-filter-pill">${tag} <span onclick="removeActiveFilter('${tag.replace(/'/g, "\\'")}')" style="cursor:pointer;margin-left:4px;">×</span></span>`
       ).join('') + `<span class="active-filter-pill" onclick="clearTagFilters()" style="cursor:pointer;background:#374151;">Clear all ×</span>`;
