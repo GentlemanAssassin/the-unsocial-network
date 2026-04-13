@@ -927,9 +927,10 @@
       <div class="active-filters" id="activeFilters"></div>
       <div id="homeView" class="view active">
         <div class="sort-controls">
-          <button class="sort-btn active" id="dateSortBtn" onclick="toggleDateSort()">Newest</button>
-          <button class="sort-btn" data-sort="shuffle">Shuffle</button>
-          <button class="sort-btn" onclick="openTagFilterModal()">Tags</button>
+          <button class="sort-btn active" id="cycleSortBtn" onclick="cycleSort()">Newest</button>
+          <button class="sort-btn" id="typeFilterBtn" onclick="openTypeFilterModal()">Type</button>
+          <button class="sort-btn" id="categoryFilterBtn" onclick="openCategoryFilterModal()">Category</button>
+          <button class="sort-btn" id="tagFilterSortBtn" onclick="openTagFilterModal()">Tags</button>
         </div>
         <div class="cards-container" id="cardsContainer"></div>
       </div>
@@ -1001,6 +1002,32 @@
       <div class="modal-buttons">
         <button class="modal-btn secondary" id="cancelAddBtn">Cancel</button>
         <button class="modal-btn primary" id="submitAddBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="typeFilterModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="document.getElementById('typeFilterModal').classList.remove('open')">✕</button>
+      <div class="modal-title">Filter by Type</div>
+      <div class="modal-section tag-filter-modal-content">
+        <div class="tag-filter-list" id="typeFilterList"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" onclick="clearTypeFilters()">Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="categoryFilterModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="document.getElementById('categoryFilterModal').classList.remove('open')">✕</button>
+      <div class="modal-title">Filter by Category</div>
+      <div class="modal-section tag-filter-modal-content">
+        <div class="tag-filter-list" id="categoryFilterList"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" onclick="clearCategoryFilters()">Clear All</button>
       </div>
     </div>
   </div>
@@ -2219,6 +2246,8 @@
     let feedIndices = [];
     let feedCurrentIndex = 0;
     let activeTagFilters = new Set();
+    let activeTypeFilters = new Set();
+    let activeCategoryFilters = new Set();
     let pointerStartX = 0;
     let pointerStartY = 0;
     let isDragging = false;
@@ -2260,6 +2289,8 @@
       const article = articles[index];
       if (article.archived) return false;
       if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase()) && !article.summary.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (activeTypeFilters.size > 0 && !activeTypeFilters.has(article.contentType)) return false;
+      if (activeCategoryFilters.size > 0 && !activeCategoryFilters.has(article.category)) return false;
       if (activeTagFilters.size > 0 && !article.tags.some(t => activeTagFilters.has(t))) return false;
       return true;
     }
@@ -2272,17 +2303,18 @@
       renderHome();
     }
 
-    function toggleDateSort() {
-      const btn = document.getElementById('dateSortBtn');
+    function cycleSort() {
+      const btn = document.getElementById('cycleSortBtn');
       if (currentSort === 'newest') {
         currentSort = 'oldest';
         btn.textContent = 'Oldest';
+      } else if (currentSort === 'oldest') {
+        currentSort = 'shuffle';
+        btn.textContent = 'Random';
       } else {
         currentSort = 'newest';
         btn.textContent = 'Newest';
       }
-      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       renderHome();
     }
 
@@ -2325,10 +2357,84 @@
       if (redoBtn) redoBtn.disabled = redoStack.length === 0;
     }
 
+    function openTypeFilterModal() {
+      const typeCounts = {};
+      articles.forEach(a => {
+        if (!a.archived) typeCounts[a.contentType] = (typeCounts[a.contentType] || 0) + 1;
+      });
+      const sorted = Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a]);
+      const container = document.getElementById('typeFilterList');
+      container.innerHTML = sorted.map(t =>
+        `<button class="tag-filter-chip ${activeTypeFilters.has(t) ? 'selected' : ''}" onclick="toggleTypeFilter('${t}')">${t} <span style="opacity:0.5;font-size:11px;">(${typeCounts[t]})</span></button>`
+      ).join('');
+      document.getElementById('typeFilterModal').classList.add('open');
+    }
+
+    function toggleTypeFilter(type) {
+      if (activeTypeFilters.has(type)) activeTypeFilters.delete(type);
+      else activeTypeFilters.add(type);
+      openTypeFilterModal();
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function clearTypeFilters() {
+      activeTypeFilters.clear();
+      document.getElementById('typeFilterModal').classList.remove('open');
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function openCategoryFilterModal() {
+      const catCounts = {};
+      articles.forEach(a => {
+        if (!a.archived && (activeTypeFilters.size === 0 || activeTypeFilters.has(a.contentType))) {
+          catCounts[a.category] = (catCounts[a.category] || 0) + 1;
+        }
+      });
+      const sorted = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a]);
+      const container = document.getElementById('categoryFilterList');
+      container.innerHTML = sorted.map(c =>
+        `<button class="tag-filter-chip ${activeCategoryFilters.has(c) ? 'selected' : ''}" onclick="toggleCategoryFilter('${c.replace(/'/g, "\\'")}')">${c} <span style="opacity:0.5;font-size:11px;">(${catCounts[c]})</span></button>`
+      ).join('');
+      document.getElementById('categoryFilterModal').classList.add('open');
+    }
+
+    function toggleCategoryFilter(cat) {
+      if (activeCategoryFilters.has(cat)) activeCategoryFilters.delete(cat);
+      else activeCategoryFilters.add(cat);
+      openCategoryFilterModal();
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function clearCategoryFilters() {
+      activeCategoryFilters.clear();
+      document.getElementById('categoryFilterModal').classList.remove('open');
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function updateFilterBtnStates() {
+      const typeBtn = document.getElementById('typeFilterBtn');
+      const catBtn = document.getElementById('categoryFilterBtn');
+      const tagBtn = document.getElementById('tagFilterSortBtn');
+      if (typeBtn) typeBtn.textContent = activeTypeFilters.size > 0 ? 'Type (' + activeTypeFilters.size + ')' : 'Type';
+      if (catBtn) catBtn.textContent = activeCategoryFilters.size > 0 ? 'Category (' + activeCategoryFilters.size + ')' : 'Category';
+      if (tagBtn) tagBtn.textContent = activeTagFilters.size > 0 ? 'Tags (' + activeTagFilters.size + ')' : 'Tags';
+    }
+
     function openTagFilterModal() {
       const tagCounts = {};
       articles.forEach(a => {
-        if (!a.archived) a.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+        if (a.archived) return;
+        if (activeTypeFilters.size > 0 && !activeTypeFilters.has(a.contentType)) return;
+        if (activeCategoryFilters.size > 0 && !activeCategoryFilters.has(a.category)) return;
+        a.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
       });
       const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
       const container = document.getElementById('tagFilterList');
@@ -2346,6 +2452,7 @@
       }
       openTagFilterModal();
       renderActiveFilters();
+      updateFilterBtnStates();
       render();
     }
 
@@ -2353,32 +2460,68 @@
       activeTagFilters.clear();
       document.getElementById('tagFilterModal').classList.remove('open');
       renderActiveFilters();
+      updateFilterBtnStates();
       render();
     }
 
     function applyTagFilters() {
       document.getElementById('tagFilterModal').classList.remove('open');
       renderActiveFilters();
+      updateFilterBtnStates();
       render();
     }
 
     function renderActiveFilters() {
       const container = document.getElementById('activeFilters');
       if (!container) return;
-      if (activeTagFilters.size === 0) {
+      const hasAny = activeTypeFilters.size > 0 || activeCategoryFilters.size > 0 || activeTagFilters.size > 0;
+      if (!hasAny) {
         container.innerHTML = '';
         container.style.display = 'none';
         return;
       }
       container.style.display = 'flex';
-      container.innerHTML = Array.from(activeTagFilters).map(tag =>
-        `<span class="active-filter-pill">${tag} <span onclick="removeActiveFilter('${tag.replace(/'/g, "\\'")}')" style="cursor:pointer;margin-left:4px;">×</span></span>`
-      ).join('') + `<span class="active-filter-pill" onclick="clearTagFilters()" style="cursor:pointer;background:#374151;">Clear all ×</span>`;
+      let html = '';
+      activeTypeFilters.forEach(t => {
+        html += `<span class="active-filter-pill" onclick="removeActiveType('${t}')">${t} ×</span>`;
+      });
+      activeCategoryFilters.forEach(c => {
+        html += `<span class="active-filter-pill" onclick="removeActiveCategory('${c.replace(/'/g, "\\'")}')">${c} ×</span>`;
+      });
+      activeTagFilters.forEach(t => {
+        html += `<span class="active-filter-pill" onclick="removeActiveTag('${t.replace(/'/g, "\\'")}')">${t} ×</span>`;
+      });
+      html += `<span class="active-filter-pill" onclick="clearAllFilters()" style="cursor:pointer;background:#374151;">Clear all ×</span>`;
+      container.innerHTML = html;
     }
 
-    function removeActiveFilter(tag) {
+    function removeActiveType(type) {
+      activeTypeFilters.delete(type);
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function removeActiveCategory(cat) {
+      activeCategoryFilters.delete(cat);
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function removeActiveTag(tag) {
       activeTagFilters.delete(tag);
       renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+    }
+
+    function clearAllFilters() {
+      activeTypeFilters.clear();
+      activeCategoryFilters.clear();
+      activeTagFilters.clear();
+      renderActiveFilters();
+      updateFilterBtnStates();
       render();
     }
 
@@ -2650,6 +2793,8 @@
         document.getElementById('tagModal').classList.remove('open');
         document.getElementById('addModal').classList.remove('open');
         document.getElementById('tagFilterModal').classList.remove('open');
+        document.getElementById('typeFilterModal').classList.remove('open');
+        document.getElementById('categoryFilterModal').classList.remove('open');
       }
       if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
