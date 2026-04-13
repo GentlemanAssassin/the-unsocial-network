@@ -46,8 +46,20 @@
       z-index: 100;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+
     .header-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
@@ -241,27 +253,52 @@
 
     .card-actions {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid rgba(91, 156, 246, 0.08);
     }
 
     .action-btn {
-      flex: 1;
-      min-width: 50px;
-      padding: 8px 12px;
-      background: rgba(91, 156, 246, 0.1);
-      border: 1px solid rgba(91, 156, 246, 0.2);
-      border-radius: 6px;
-      color: #5B9CF6;
-      font-size: 12px;
-      font-weight: 500;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      background: none;
+      border: none;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
     }
 
     .action-btn:active {
-      background: rgba(91, 156, 246, 0.2);
-      transform: scale(0.95);
+      background: rgba(91, 156, 246, 0.15);
+      transform: scale(0.9);
+    }
+
+    .action-btn img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
+    .action-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: #9CA3AF;
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    .action-btn:active svg {
+      stroke: #5B9CF6;
+    }
+
+    .action-btn.liked svg {
+      stroke: #F47067;
+      fill: #F47067;
     }
 
     #feedView {
@@ -732,6 +769,117 @@
       min-height: 100px;
     }
 
+    .undo-redo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 16px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(91, 156, 246, 0.06);
+    }
+
+    .undo-redo-btn {
+      padding: 6px 14px;
+      background: rgba(91, 156, 246, 0.08);
+      border: 1px solid rgba(91, 156, 246, 0.15);
+      border-radius: 6px;
+      color: #5B9CF6;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .undo-redo-btn:disabled {
+      opacity: 0.25;
+      cursor: default;
+    }
+
+    .undo-redo-btn:not(:disabled):active {
+      background: rgba(91, 156, 246, 0.2);
+      transform: scale(0.95);
+    }
+
+    .tag-filter-btn {
+      padding: 6px 14px;
+      background: rgba(91, 156, 246, 0.08);
+      border: 1px solid rgba(91, 156, 246, 0.15);
+      border-radius: 6px;
+      color: #9CA3AF;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: auto;
+    }
+
+    .tag-filter-btn.active-filter {
+      background: rgba(91, 156, 246, 0.2);
+      border-color: #5B9CF6;
+      color: #5B9CF6;
+    }
+
+    .tag-filter-btn:active {
+      transform: scale(0.95);
+    }
+
+    .tag-filter-modal-content {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .tag-filter-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag-filter-chip {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(91, 156, 246, 0.15);
+      background: rgba(91, 156, 246, 0.05);
+      color: #9CA3AF;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag-filter-chip.selected {
+      background: rgba(91, 156, 246, 0.2);
+      border-color: #5B9CF6;
+      color: #5B9CF6;
+    }
+
+    .tag-filter-chip:active {
+      transform: scale(0.95);
+    }
+
+    .active-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 0 16px 8px;
+    }
+
+    .active-filter-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: rgba(91, 156, 246, 0.15);
+      border-radius: 12px;
+      color: #5B9CF6;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -753,7 +901,10 @@
 <body>
   <div id="app">
     <header>
-      <div class="header-title">The Unsocial Network</div>
+      <div class="header-left">
+        <img src="icon.png" alt="" class="header-logo">
+        <div class="header-title">The Unsocial Network</div>
+      </div>
       <div class="header-actions">
         <button class="header-btn" id="searchBtn" title="Search">🔍</button>
         <button class="header-btn" id="addBtn" title="Add Content">➕</button>
@@ -761,12 +912,19 @@
     </header>
 
     <div class="content">
+      <div class="undo-redo-bar">
+        <button class="undo-redo-btn" id="undoBtn" disabled onclick="undo()">↩ Undo</button>
+        <button class="undo-redo-btn" id="redoBtn" disabled onclick="redo()">Redo ↪</button>
+        <button class="tag-filter-btn" id="tagFilterBtn" onclick="openTagFilterModal()">🏷 Tags</button>
+      </div>
+      <div class="active-filters" id="activeFilters"></div>
       <div id="homeView" class="view active">
         <div class="sort-controls">
           <button class="sort-btn active" data-sort="newest">Newest</button>
           <button class="sort-btn" data-sort="oldest">Oldest</button>
           <button class="sort-btn" data-sort="saved">Date Saved</button>
           <button class="sort-btn" data-sort="shuffle">Shuffle</button>
+          <button class="sort-btn" data-sort="category">Category</button>
         </div>
         <div class="cards-container" id="cardsContainer"></div>
       </div>
@@ -783,11 +941,11 @@
     <nav>
       <button class="nav-btn active" data-view="home">
         <div class="nav-icon">📚</div>
-        <div>Home</div>
+        <div>The Feed</div>
       </button>
       <button class="nav-btn" data-view="feed">
-        <div class="nav-icon">🎯</div>
-        <div>Feed</div>
+        <div class="nav-icon">🃏</div>
+        <div>Swipe</div>
       </button>
       <button class="nav-btn" data-view="saved">
         <div class="nav-icon">⭐</div>
@@ -838,6 +996,20 @@
       <div class="modal-buttons">
         <button class="modal-btn secondary" id="cancelAddBtn">Cancel</button>
         <button class="modal-btn primary" id="submitAddBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tagFilterModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeTagFilterModal">✕</button>
+      <div class="modal-title">Filter by Tags</div>
+      <div class="modal-section tag-filter-modal-content">
+        <div class="tag-filter-list" id="tagFilterList"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" id="clearTagFilters">Clear All</button>
+        <button class="modal-btn primary" id="applyTagFilters">Apply</button>
       </div>
     </div>
   </div>
@@ -2041,6 +2213,7 @@
     let currentEditingIndex = -1;
     let feedIndices = [];
     let feedCurrentIndex = 0;
+    let activeTagFilters = new Set();
     let pointerStartX = 0;
     let pointerStartY = 0;
     let isDragging = false;
@@ -2067,6 +2240,8 @@
         sorted.sort((a, b) => parseDate(articles[a].datePosted) - parseDate(articles[b].datePosted));
       } else if (sort === 'saved') {
         sorted.sort((a, b) => parseDate(articles[b].dateSent) - parseDate(articles[a].dateSent));
+      } else if (sort === 'category') {
+        sorted.sort((a, b) => (articles[a].category || '').localeCompare(articles[b].category || ''));
       } else if (sort === 'shuffle') {
         for (let i = sorted.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -2080,6 +2255,7 @@
       const article = articles[index];
       if (article.archived) return false;
       if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase()) && !article.summary.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (activeTagFilters.size > 0 && !article.tags.some(t => activeTagFilters.has(t))) return false;
       return true;
     }
 
@@ -2093,12 +2269,14 @@
     function saveState() {
       undoStack.push(JSON.stringify(articles));
       redoStack = [];
+      updateUndoRedo();
     }
 
     function undo() {
       if (undoStack.length > 0) {
         redoStack.push(JSON.stringify(articles));
         articles = JSON.parse(undoStack.pop());
+        updateUndoRedo();
         render();
       }
     }
@@ -2107,6 +2285,7 @@
       if (redoStack.length > 0) {
         undoStack.push(JSON.stringify(articles));
         articles = JSON.parse(redoStack.pop());
+        updateUndoRedo();
         render();
       }
     }
@@ -2119,6 +2298,64 @@
       setTimeout(() => toast.remove(), 3000);
     }
 
+    function updateUndoRedo() {
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+      if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+      if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function openTagFilterModal() {
+      const allTags = new Set();
+      articles.forEach(a => a.tags.forEach(t => allTags.add(t)));
+      const sortedTags = Array.from(allTags).sort();
+      const container = document.getElementById('tagFilterList');
+      container.innerHTML = sortedTags.map(tag =>
+        `<button class="tag-filter-chip ${activeTagFilters.has(tag) ? 'selected' : ''}" onclick="toggleTagFilter('${tag.replace(/'/g, "\\'")}')">${tag}</button>`
+      ).join('');
+      document.getElementById('tagFilterModal').classList.add('open');
+    }
+
+    function toggleTagFilter(tag) {
+      if (activeTagFilters.has(tag)) {
+        activeTagFilters.delete(tag);
+      } else {
+        activeTagFilters.add(tag);
+      }
+      openTagFilterModal();
+    }
+
+    function clearTagFilters() {
+      activeTagFilters.clear();
+      document.getElementById('tagFilterModal').classList.remove('open');
+      renderActiveFilters();
+      render();
+    }
+
+    function applyTagFilters() {
+      document.getElementById('tagFilterModal').classList.remove('open');
+      renderActiveFilters();
+      render();
+    }
+
+    function renderActiveFilters() {
+      const container = document.getElementById('activeFilters');
+      if (!container) return;
+      if (activeTagFilters.size === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = Array.from(activeTagFilters).map(tag =>
+        `<span class="active-filter-pill">${tag} <span onclick="removeActiveFilter('${tag.replace(/'/g, "\\'")}')" style="cursor:pointer;margin-left:4px;">×</span></span>`
+      ).join('') + `<span class="active-filter-pill" onclick="clearTagFilters()" style="cursor:pointer;background:#374151;">Clear all ×</span>`;
+    }
+
+    function removeActiveFilter(tag) {
+      activeTagFilters.delete(tag);
+      renderActiveFilters();
+      render();
+    }
+
     function renderHome() {
       const container = document.getElementById('cardsContainer');
       container.innerHTML = '';
@@ -2128,7 +2365,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="window.open('${article.url}', '_blank')">Open</button><button class="action-btn" onclick="archiveArticle(${idx})">Archive</button><button class="action-btn" onclick="toggleLike(${idx})">${article.liked ? 'Unlike' : 'Like'}</button><button class="action-btn" onclick="openTagModal(${idx})">Tags</button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})">More</button></div>`;
+        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="window.open('${article.url}', '_blank')"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
         container.appendChild(card);
       });
     }
@@ -2153,7 +2390,7 @@
         if (i === 0) card.classList.add('active');
         else if (i === 1) card.classList.add('next');
         else if (i === 2) card.classList.add('next-next');
-        card.innerHTML = `<div class="feed-card-header"><div class="feed-card-type">${article.contentType}</div><div class="feed-card-date">${article.dateSent}</div></div><div class="feed-card-title">${article.title}</div><div class="feed-card-author">by ${article.author}</div><div class="feed-card-posted">${article.datePosted}</div><div class="feed-card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="feed-card-summary">${article.summary}</div><div class="feed-card-actions"><button class="feed-action-btn" onclick="archiveArticle(${idx})">Archive</button><button class="feed-action-btn" onclick="toggleLike(${idx})">${article.liked ? 'Unlike' : 'Like'}</button><button class="feed-action-btn" onclick="openTagModal(${idx})">Tags</button><button class="feed-action-btn" onclick="window.open('${article.url}', '_blank')">Open</button></div>`;
+        card.innerHTML = `<div class="feed-card-header"><div class="feed-card-type">${article.contentType}</div><div class="feed-card-date">${article.dateSent}</div></div><div class="feed-card-title">${article.title}</div><div class="feed-card-author">by ${article.author}</div><div class="feed-card-posted">${article.datePosted}</div><div class="feed-card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="feed-card-summary">${article.summary}</div><div class="feed-card-actions"><button class="action-btn" onclick="window.open('${article.url}', '_blank')"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button></div>`;
         card.addEventListener('pointerdown', feedCardPointerDown);
         card.addEventListener('pointermove', feedCardPointerMove);
         card.addEventListener('pointerup', feedCardPointerUp);
@@ -2174,7 +2411,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="window.open('${article.url}', '_blank')">Open</button><button class="action-btn" onclick="archiveArticle(${idx})">Archive</button><button class="action-btn" onclick="toggleLike(${idx})">Remove</button><button class="action-btn" onclick="openTagModal(${idx})">Tags</button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})">More</button></div>`;
+        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="window.open('${article.url}', '_blank')"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="Remove" title="Remove" style="filter: drop-shadow(0 0 4px #F472B6); opacity:1;"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
         container.appendChild(card);
       });
     }
@@ -2374,10 +2611,17 @@
       btn.addEventListener('click', () => setSort(btn.dataset.sort));
     });
 
+    document.getElementById('closeTagFilterModal').addEventListener('click', () => {
+      document.getElementById('tagFilterModal').classList.remove('open');
+    });
+    document.getElementById('clearTagFilters').addEventListener('click', clearTagFilters);
+    document.getElementById('applyTagFilters').addEventListener('click', applyTagFilters);
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.getElementById('tagModal').classList.remove('open');
         document.getElementById('addModal').classList.remove('open');
+        document.getElementById('tagFilterModal').classList.remove('open');
       }
       if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
