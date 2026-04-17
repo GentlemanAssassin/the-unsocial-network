@@ -35,7 +35,7 @@
     }
 
     header {
-      padding: 12px 16px;
+      padding: 16px 16px;
       background: rgba(10, 12, 16, 0.7);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(91, 156, 246, 0.1);
@@ -53,13 +53,13 @@
     }
 
     .header-logo {
-      width: 28px;
-      height: 28px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
     }
 
     .header-title {
-      font-size: 16px;
+      font-size: 32px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
@@ -523,6 +523,22 @@
       font-size: 20px;
     }
 
+    .nav-icon-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .nav-btn:disabled .nav-icon-img {
+      opacity: 0.2;
+    }
+
+    .nav-btn:not(:disabled):active .nav-icon-img {
+      opacity: 1;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -920,10 +936,6 @@
     </header>
 
     <div class="content">
-      <div class="undo-redo-bar">
-        <button class="undo-redo-btn" id="undoBtn" disabled onclick="undo()">↩ Undo</button>
-        <button class="undo-redo-btn" id="redoBtn" disabled onclick="redo()">Redo ↪</button>
-      </div>
       <div class="active-filters" id="activeFilters"></div>
       <div id="homeView" class="view active">
         <div class="sort-controls">
@@ -945,17 +957,19 @@
     </div>
 
     <nav>
+      <button class="nav-btn" id="undoNavBtn" disabled onclick="undo()">
+        <img src="Icons/Undo.png" alt="Undo" class="nav-icon-img">
+      </button>
       <button class="nav-btn active" data-view="home">
         <div class="nav-icon">📚</div>
         <div>The Feed</div>
       </button>
-      <button class="nav-btn" data-view="feed">
-        <div class="nav-icon">🃏</div>
-        <div>Swipe</div>
-      </button>
       <button class="nav-btn" data-view="saved">
         <div class="nav-icon">⭐</div>
         <div>Saved</div>
+      </button>
+      <button class="nav-btn" id="redoNavBtn" disabled onclick="redo()">
+        <img src="Icons/Redo.png" alt="Redo" class="nav-icon-img">
       </button>
     </nav>
   </div>
@@ -3133,8 +3147,8 @@
     }
 
     function updateUndoRedo() {
-      const undoBtn = document.getElementById('undoBtn');
-      const redoBtn = document.getElementById('redoBtn');
+      const undoBtn = document.getElementById('undoNavBtn');
+      const redoBtn = document.getElementById('redoNavBtn');
       if (undoBtn) undoBtn.disabled = undoStack.length === 0;
       if (redoBtn) redoBtn.disabled = redoStack.length === 0;
     }
@@ -3316,7 +3330,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
+        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
         container.appendChild(card);
       });
     }
@@ -3341,7 +3355,7 @@
         if (i === 0) card.classList.add('active');
         else if (i === 1) card.classList.add('next');
         else if (i === 2) card.classList.add('next-next');
-        card.innerHTML = `<div class="feed-card-header"><div class="feed-card-type">${article.contentType}</div><div class="feed-card-date">${article.dateSent}</div></div><div class="feed-card-title">${article.title}</div><div class="feed-card-author">by ${article.author}</div><div class="feed-card-posted">${article.datePosted}</div><div class="feed-card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="feed-card-summary">${article.summary}</div><div class="feed-card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button></div>`;
+        card.innerHTML = `<div class="feed-card-header"><div class="feed-card-type">${article.contentType}</div><div class="feed-card-date">${article.dateSent}</div></div><div class="feed-card-title">${article.title}</div><div class="feed-card-author">by ${article.author}</div><div class="feed-card-posted">${article.datePosted}</div><div class="feed-card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="feed-card-summary">${article.summary}</div><div class="feed-card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="${article.liked ? 'Unlike' : 'Like'}" title="${article.liked ? 'Unlike' : 'Like'}" style="${article.liked ? 'filter: drop-shadow(0 0 4px #F472B6); opacity:1;' : ''}"></button></div>`;
         card.addEventListener('pointerdown', feedCardPointerDown);
         card.addEventListener('pointermove', feedCardPointerMove);
         card.addEventListener('pointerup', feedCardPointerUp);
@@ -3362,7 +3376,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="Remove" title="Remove" style="filter: drop-shadow(0 0 4px #F472B6); opacity:1;"></button><button class="action-btn" onclick="shareArticle(${idx})"><img src="Icons/Share.png" alt="Share" title="Share"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
+        card.innerHTML = `<div class="card-header"><div class="card-meta"><div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div><div class="card-date">${article.dateSent}</div></div><div class="card-title">${article.title}</div><div class="card-author">by ${article.author}</div><div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div><div class="card-summary">${article.summary}</div><div class="card-actions"><button class="action-btn" onclick="openArticle(${idx})"><img src="Icons/ShuffleIn.png" alt="Open" title="Open"></button><button class="action-btn" onclick="archiveArticle(${idx})"><img src="Icons/Archive.png" alt="Archive" title="Archive"></button><button class="action-btn" onclick="toggleLike(${idx})"><img src="Icons/Like.png" alt="Remove" title="Remove" style="filter: drop-shadow(0 0 4px #F472B6); opacity:1;"></button><button class="action-btn" onclick="showOptionsMenu(event, ${idx})"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="#9CA3AF" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="#9CA3AF" stroke="none"/></svg></button></div>`;
         container.appendChild(card);
       });
     }
