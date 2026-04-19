@@ -3730,6 +3730,7 @@
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const view = e.currentTarget.dataset.view;
+        if (!view) return;
         currentView = view;
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
