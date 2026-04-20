@@ -320,6 +320,17 @@
       color: #D1D5DB;
     }
 
+    .card-category {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 4px 0 8px;
+      align-self: flex-start;
+    }
+
     .card-date {
       color: #6B7280;
     }
@@ -1002,6 +1013,105 @@
       transform: scale(0.95);
     }
 
+    .search-bar {
+      display: none;
+      padding: 8px 12px;
+      background: #0F1724;
+      border-bottom: 1px solid rgba(91, 156, 246, 0.15);
+      flex-shrink: 0;
+      animation: searchBarEnter 0.18s ease-out;
+    }
+
+    .search-bar.open {
+      display: block;
+    }
+
+    @keyframes searchBarEnter {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(91, 156, 246, 0.08);
+      border: 1px solid rgba(91, 156, 246, 0.2);
+      border-radius: 10px;
+      padding: 6px 8px 6px 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar-icon {
+      font-size: 16px;
+      color: #5B9CF6;
+      flex-shrink: 0;
+    }
+
+    .search-bar-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .search-bar-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(91, 156, 246, 0.18);
+      border-radius: 10px;
+      color: #5B9CF6;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .search-bar-tag-remove {
+      cursor: pointer;
+      opacity: 0.8;
+      line-height: 1;
+      font-size: 14px;
+    }
+
+    .search-bar-tag-remove:hover {
+      opacity: 1;
+    }
+
+    .search-bar-input {
+      flex: 1;
+      min-width: 120px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #F3F4F6;
+      font-size: 14px;
+      padding: 4px 0;
+      font-family: inherit;
+    }
+
+    .search-bar-input::placeholder {
+      color: #6B7280;
+    }
+
+    .search-bar-close {
+      background: transparent;
+      border: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .search-bar-close:hover {
+      background: rgba(91, 156, 246, 0.12);
+      color: #F3F4F6;
+    }
+
     .active-filters {
       display: none;
       gap: 6px;
@@ -1058,6 +1168,14 @@
     </header>
 
     <div class="content">
+      <div class="search-bar" id="searchBar">
+        <div class="search-bar-inner">
+          <i class="ph ph-magnifying-glass search-bar-icon"></i>
+          <div class="search-bar-tags" id="searchBarTags"></div>
+          <input type="text" id="searchInput" class="search-bar-input" placeholder="Search titles and summaries..." autocomplete="off" />
+          <button class="search-bar-close" id="searchBarClose" title="Close search"><i class="ph ph-x"></i></button>
+        </div>
+      </div>
       <div class="active-filters" id="activeFilters"></div>
       <div id="homeView" class="view active">
         <div class="sort-controls">
@@ -1090,7 +1208,7 @@
         <i class="ph-fill ph-cards" id="viewModeIcon"></i>
       </button>
       <button class="nav-btn" id="undoNavBtn" disabled onclick="undo()" title="Undo">
-        <i class="ph-fill ph-arrows-counter-clockwise"></i>
+        <i class="ph-fill ph-arrow-counter-clockwise"></i>
       </button>
       <button class="nav-btn" id="redoNavBtn" disabled onclick="redo()" title="Redo">
         <i class="ph-fill ph-arrow-clockwise"></i>
@@ -3647,6 +3765,8 @@
     let currentView = 'home';
     let currentSort = 'newest';
     let searchQuery = '';
+    let searchTags = [];
+    let viewBeforeSearch = null;
     let undoStack = [];
     let redoStack = [];
     let currentEditingIndex = -1;
@@ -3708,6 +3828,7 @@
         <div class="card-meta">${newBadge}<div class="card-type">${article.contentType}</div><div class="card-platform">${article.platform}</div></div>
         <button class="card-edit-btn" onclick="openEditPost(${idx})" title="Edit"><i class="ph ph-pencil"></i></button>
       </div>
+      ${article.category ? `<div class="card-category" style="background-color: ${catColor}22; color: ${catColor};">${article.category}</div>` : ''}
       <div class="card-title" onclick="openArticle(${idx})" style="cursor:pointer;">${article.title}</div>
       <div class="card-author">by ${article.author}</div>
       <div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div>
@@ -3722,13 +3843,25 @@
       </div>`;
     }
 
+    function addedTimestamp(article) {
+      // When was this item added to the app? Prefer the precise addedAt ISO timestamp;
+      // fall back to dateSent; last resort is datePosted (original publish date).
+      if (article.addedAt) {
+        const t = new Date(article.addedAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      const sent = parseDate(article.dateSent);
+      if (sent.getTime() > 0) return sent.getTime();
+      return parseDate(article.datePosted).getTime();
+    }
+
     function getSortedIndices(sort = 'newest') {
       const visible = articles.map((a, i) => i).filter(i => isVisible(i));
       const sorted = [...visible];
       if (sort === 'newest') {
-        sorted.sort((a, b) => parseDate(articles[b].datePosted) - parseDate(articles[a].datePosted));
+        sorted.sort((a, b) => addedTimestamp(articles[b]) - addedTimestamp(articles[a]));
       } else if (sort === 'oldest') {
-        sorted.sort((a, b) => parseDate(articles[a].datePosted) - parseDate(articles[b].datePosted));
+        sorted.sort((a, b) => addedTimestamp(articles[a]) - addedTimestamp(articles[b]));
       } else if (sort === 'saved') {
         sorted.sort((a, b) => parseDate(articles[b].dateSent) - parseDate(articles[a].dateSent));
       } else if (sort === 'category') {
@@ -3742,11 +3875,22 @@
       return sorted;
     }
 
+    function matchesSearchTerm(article, term) {
+      if (!term) return true;
+      const t = term.toLowerCase();
+      const inTitle = (article.title || '').toLowerCase().includes(t);
+      const inSummary = (article.summary || '').toLowerCase().includes(t);
+      const inAuthor = (article.author || '').toLowerCase().includes(t);
+      const inTags = (article.tags || []).some(x => x.toLowerCase().includes(t));
+      return inTitle || inSummary || inAuthor || inTags;
+    }
+
     function isVisible(index) {
       const article = articles[index];
       if (article.archived) return false;
       if (article.liked) return false; // favorites also get pulled from the main feed
-      if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase()) && !article.summary.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (searchQuery && !matchesSearchTerm(article, searchQuery)) return false;
+      if (searchTags.length > 0 && !searchTags.every(tag => matchesSearchTerm(article, tag))) return false;
       if (activeTypeFilters.size > 0 && !activeTypeFilters.has(article.contentType)) return false;
       if (activeCategoryFilters.size > 0 && !activeCategoryFilters.has(article.category)) return false;
       if (activeTagFilters.size > 0 && !article.tags.some(t => activeTagFilters.has(t))) return false;
@@ -4173,9 +4317,23 @@
 
     function shareArticle(idx) {
       const article = articles[idx];
-      const text = article.title + ' - ' + article.url;
-      navigator.clipboard.writeText(text);
-      showToast('Copied to clipboard');
+      const shareData = {
+        title: article.title,
+        text: article.title,
+        url: article.url
+      };
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        navigator.share(shareData).catch((err) => {
+          // User cancelled or share failed silently; don't surface an error
+          if (err && err.name !== 'AbortError') {
+            navigator.clipboard.writeText(article.title + ' - ' + article.url);
+            showToast('Copied to clipboard');
+          }
+        });
+      } else {
+        navigator.clipboard.writeText(article.title + ' - ' + article.url);
+        showToast('Copied to clipboard');
+      }
     }
 
     function openEditPost(idx) {
@@ -4299,15 +4457,90 @@
       document.getElementById('tagModal').classList.remove('open');
     });
 
-    document.getElementById('searchBtn').addEventListener('click', () => {
-      const query = prompt('Search:');
-      if (query !== null) {
-        searchQuery = query;
-        currentView = 'home';
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById('homeView').classList.add('active');
-        updateViewModeIcon();
+    function renderSearchTags() {
+      const container = document.getElementById('searchBarTags');
+      if (!container) return;
+      container.innerHTML = searchTags.map((tag, i) =>
+        `<span class="search-bar-tag">${tag}<span class="search-bar-tag-remove" onclick="removeSearchTag(${i})">×</span></span>`
+      ).join('');
+    }
+
+    function removeSearchTag(i) {
+      searchTags.splice(i, 1);
+      renderSearchTags();
+      render();
+    }
+
+    function openSearchBar() {
+      const bar = document.getElementById('searchBar');
+      const input = document.getElementById('searchInput');
+      if (bar.classList.contains('open')) {
+        // Already open — just focus
+        input.focus();
+        return;
+      }
+      viewBeforeSearch = currentView;
+      // Searching makes sense on the home feed
+      currentView = 'home';
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('homeView').classList.add('active');
+      updateViewModeIcon();
+      bar.classList.add('open');
+      input.value = '';
+      searchQuery = '';
+      renderSearchTags();
+      setTimeout(() => input.focus(), 40);
+      render();
+    }
+
+    function closeSearchBar() {
+      const bar = document.getElementById('searchBar');
+      const input = document.getElementById('searchInput');
+      bar.classList.remove('open');
+      input.value = '';
+      searchQuery = '';
+      searchTags = [];
+      renderSearchTags();
+      // Restore prior view
+      const restore = viewBeforeSearch && document.getElementById(viewBeforeSearch + 'View') ? viewBeforeSearch : 'home';
+      viewBeforeSearch = null;
+      currentView = restore;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(restore + 'View').classList.add('active');
+      const restoreNavBtn = document.querySelector(`.nav-btn[data-view="${restore}"]`);
+      if (restoreNavBtn) restoreNavBtn.classList.add('active');
+      updateViewModeIcon();
+      render();
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', openSearchBar);
+    document.getElementById('searchBarClose').addEventListener('click', closeSearchBar);
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = e.target.value.trim();
+        if (val && !searchTags.includes(val)) {
+          searchTags.push(val);
+        }
+        e.target.value = '';
+        searchQuery = '';
+        renderSearchTags();
+        render();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSearchBar();
+      } else if (e.key === 'Backspace' && !e.target.value && searchTags.length > 0) {
+        // Backspace on empty input removes the last tag
+        searchTags.pop();
+        renderSearchTags();
         render();
       }
     });
