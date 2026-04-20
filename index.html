@@ -1133,8 +1133,29 @@
         <input type="text" id="titleInput" placeholder="Article Title">
       </div>
       <div class="modal-section">
+        <div class="modal-label">Content Type</div>
+        <select id="typeInput" style="background: rgba(91, 156, 246, 0.05); border: 1px solid rgba(91, 156, 246, 0.2); border-radius: 8px; padding: 10px 12px; color: #E5E7EB; font-family: 'DM Sans', sans-serif; font-size: 14px; width: 100%;">
+          <option>Post</option>
+          <option>Article</option>
+          <option>Longform</option>
+          <option>Video</option>
+          <option>Podcast</option>
+          <option>Tool</option>
+          <option>Data Source</option>
+        </select>
+      </div>
+      <div class="modal-section">
         <div class="modal-label">Category</div>
-        <input type="text" id="categoryInput" placeholder="AI Tooling">
+        <select id="categoryInput" style="background: rgba(91, 156, 246, 0.05); border: 1px solid rgba(91, 156, 246, 0.2); border-radius: 8px; padding: 10px 12px; color: #E5E7EB; font-family: 'DM Sans', sans-serif; font-size: 14px; width: 100%;">
+          <option>Markets &amp; Research</option>
+          <option>Tax &amp; Planning</option>
+          <option>AI Tooling</option>
+          <option>AI Commentary</option>
+          <option>Science &amp; World</option>
+          <option>Current Events</option>
+          <option>Creative &amp; Media</option>
+          <option>Life &amp; Leisure</option>
+        </select>
       </div>
       <div class="modal-section">
         <div class="modal-label">Summary</div>
@@ -1180,14 +1201,13 @@
       <div class="modal-section">
         <div class="modal-label">Content Type</div>
         <select id="editContentType" style="background: rgba(91, 156, 246, 0.05); border: 1px solid rgba(91, 156, 246, 0.2); border-radius: 8px; padding: 10px 12px; color: #E5E7EB; font-family: 'DM Sans', sans-serif; font-size: 14px; width: 100%;">
-          <option>Article</option>
           <option>Post</option>
+          <option>Article</option>
+          <option>Longform</option>
           <option>Video</option>
           <option>Podcast</option>
-          <option>Book</option>
-          <option>Data Source</option>
           <option>Tool</option>
-          <option>Research Paper</option>
+          <option>Data Source</option>
         </select>
       </div>
       <div class="modal-section">
@@ -1458,7 +1478,7 @@
     "dateSent": "Apr 14, 2026",
     "datePosted": "Apr 14, 2026",
     "contentType": "Video",
-    "category": "Life & Leisure",
+    "category": "Science & World",
     "tags": [
       "Philosophy"
     ],
@@ -1578,7 +1598,7 @@
     "dateSent": "Apr 13, 2026",
     "datePosted": "Apr 13, 2026",
     "contentType": "Video",
-    "category": "Life & Leisure",
+    "category": "Creative & Media",
     "tags": [
       "To Watch",
       "Movie"
@@ -1593,7 +1613,7 @@
     "dateSent": "Apr 13, 2026",
     "datePosted": "Apr 13, 2026",
     "contentType": "Video",
-    "category": "Science & World",
+    "category": "Creative & Media",
     "tags": [
       "To Watch",
       "TV Show"
@@ -1714,7 +1734,7 @@
     "dateSent": "Apr 13, 2026",
     "datePosted": "Apr 13, 2026",
     "contentType": "Video",
-    "category": "Science & World",
+    "category": "Life & Leisure",
     "tags": [
       "This Will Not Go Well"
     ],
@@ -1989,7 +2009,7 @@
     "dateSent": "Apr 9, 2026",
     "datePosted": "Apr 9, 2026",
     "contentType": "Video",
-    "category": "Science & World",
+    "category": "AI Commentary",
     "tags": [
       "Anthropic",
       "Cybersecurity",
@@ -2119,7 +2139,7 @@
     "dateSent": "Apr 12, 2026",
     "datePosted": "~Apr 12, 2026",
     "contentType": "Video",
-    "category": "Science & World",
+    "category": "AI Commentary",
     "tags": [
       "Cybersecurity",
       "Claude",
@@ -2424,8 +2444,8 @@
     "author": "Leif Weatherby",
     "dateSent": "Apr 08, 2026",
     "datePosted": "2025",
-    "contentType": "Book",
-    "category": "Creative & Media",
+    "contentType": "Longform",
+    "category": "Science & World",
     "tags": [
       "Culture",
       "Philosophy"
@@ -2498,7 +2518,7 @@
     "author": "bodila",
     "dateSent": "Apr 08, 2026",
     "datePosted": "Apr 07, 2026",
-    "contentType": "Data Source",
+    "contentType": "Post",
     "category": "Markets & Research",
     "tags": [
       "Hedge Funds",
@@ -2649,7 +2669,7 @@
     "author": "Ollama",
     "dateSent": "Apr 07, 2026",
     "datePosted": "Apr 07, 2026",
-    "contentType": "Post",
+    "contentType": "Article",
     "category": "AI Tooling",
     "tags": [
       "Local LLM",
@@ -2710,7 +2730,7 @@
     "author": "Ollama",
     "dateSent": "Apr 05, 2026",
     "datePosted": "Apr 05, 2026",
-    "contentType": "Post",
+    "contentType": "Article",
     "category": "AI Tooling",
     "tags": [
       "Cloud",
@@ -2726,7 +2746,7 @@
     "author": "Andrew Chaikin",
     "dateSent": "Apr 01, 2026",
     "datePosted": "",
-    "contentType": "Book",
+    "contentType": "Longform",
     "category": "Creative & Media",
     "tags": [
       "Apollo",
@@ -2741,7 +2761,7 @@
     "author": "Ollama",
     "dateSent": "Mar 31, 2026",
     "datePosted": "Mar 31, 2026",
-    "contentType": "Post",
+    "contentType": "Article",
     "category": "AI Tooling",
     "tags": [
       "Local LLM",
@@ -2757,7 +2777,7 @@
     "author": "Ollama",
     "dateSent": "Mar 30, 2026",
     "datePosted": "Mar 30, 2026",
-    "contentType": "Post",
+    "contentType": "Article",
     "category": "AI Tooling",
     "tags": [
       "Local LLM",
@@ -2803,7 +2823,7 @@
     "author": "Isaac Asimov",
     "dateSent": "Mar 28, 2026",
     "datePosted": "1954",
-    "contentType": "Article",
+    "contentType": "Longform",
     "category": "Creative & Media",
     "tags": [
       "Asimov",
@@ -2929,7 +2949,7 @@
     "author": "AQR / Research",
     "dateSent": "Mar 26, 2026",
     "datePosted": "2026",
-    "contentType": "Research Paper",
+    "contentType": "Longform",
     "category": "Tax & Planning",
     "tags": [
       "AQR",
@@ -2943,7 +2963,7 @@
     "title": "brrr: Instant Push Notifications to Your Devices, No Signup Required",
     "url": "https://x.com/simonbs/status/2036798027990474790",
     "platform": "X (Twitter)",
-    "author": "Simon B. St\u00f8vring",
+    "author": "Simon B. Støvring",
     "dateSent": "Mar 25, 2026",
     "datePosted": "Mar 25, 2026",
     "contentType": "Tool",
@@ -2953,7 +2973,7 @@
       "iOS",
       "Notifications"
     ],
-    "summary": "Simon B. St\u00f8vring launches brrr on the App Store, a dead-simple iOS app for sending push notifications to your own devices with no signup, dashboard, or backend required."
+    "summary": "Simon B. Støvring launches brrr on the App Store, a dead-simple iOS app for sending push notifications to your own devices with no signup, dashboard, or backend required."
   },
   {
     "title": "Trump Administration Offers 15-Point Ceasefire Plan to Iran (AP News)",
@@ -3010,7 +3030,7 @@
     "author": "Unknown",
     "dateSent": "Mar 25, 2026",
     "datePosted": "~2026-03",
-    "contentType": "Research Paper",
+    "contentType": "Longform",
     "category": "Tax & Planning",
     "tags": [
       "Direct Indexing"
@@ -3272,7 +3292,7 @@
     "author": "TheBrainMaze",
     "dateSent": "Apr 07, 2026",
     "datePosted": "Apr 07, 2026",
-    "contentType": "Post",
+    "contentType": "Video",
     "category": "Science & World",
     "tags": [
       "Space",
@@ -4200,17 +4220,30 @@
     document.getElementById('submitAddBtn').addEventListener('click', () => {
       const url = document.getElementById('urlInput').value;
       const title = document.getElementById('titleInput').value;
+      const contentType = document.getElementById('typeInput').value;
       const category = document.getElementById('categoryInput').value;
       const summary = document.getElementById('summaryInput').value;
       if (url && title) {
         saveState();
-        articles.unshift({title, url, platform: 'Manual', author: 'You', dateSent: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), datePosted: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), contentType: 'Article', category: category || 'General', tags: [], summary: summary || 'No summary provided'});
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        articles.unshift({
+          title, url,
+          platform: 'Manual',
+          author: 'You',
+          dateSent: dateStr,
+          datePosted: dateStr,
+          addedAt: now.toISOString(),
+          contentType: contentType || 'Post',
+          category: category || 'AI Tooling',
+          tags: [],
+          summary: summary || 'No summary provided'
+        });
         document.getElementById('urlInput').value = '';
         document.getElementById('titleInput').value = '';
-        document.getElementById('categoryInput').value = '';
         document.getElementById('summaryInput').value = '';
         document.getElementById('addModal').classList.remove('open');
-        showToast('Article added');
+        showToast('Added');
         render();
       }
     });
