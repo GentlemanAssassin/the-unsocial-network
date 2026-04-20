@@ -231,6 +231,13 @@
       color: #9CA3AF;
     }
 
+    .card-datetime .card-date-label {
+      color: #6B7280;
+      opacity: 0.85;
+      font-weight: 500;
+      margin-right: 2px;
+    }
+
     .card-footer-actions {
       display: flex;
       gap: 4px;
@@ -290,6 +297,71 @@
       to {
         opacity: 1;
         transform: translateY(0);
+      }
+    }
+
+    /* Archive exit — card slides to the left toward the archive button */
+    .card.card-archiving {
+      animation: cardArchive 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes cardArchive {
+      0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        max-height: 1000px;
+      }
+      60% {
+        opacity: 0;
+        transform: translateX(-110%) scale(0.85);
+        max-height: 1000px;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-110%) scale(0.85);
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+        border-width: 0;
+      }
+    }
+
+    /* Favorite exit — gold trim pulse, then shrink out */
+    .card.card-favoriting {
+      animation: cardFavoriteTrim 0.55s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes cardFavoriteTrim {
+      0% {
+        border-color: rgba(91, 156, 246, 0.1);
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+        transform: scale(1);
+      }
+      35% {
+        border-color: rgba(251, 191, 36, 0.9);
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.55), 0 0 22px 2px rgba(251, 191, 36, 0.35);
+        transform: scale(1.015);
+      }
+      70% {
+        border-color: rgba(251, 191, 36, 0.9);
+        box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.45), 0 0 18px 2px rgba(251, 191, 36, 0.3);
+        transform: scale(1);
+        opacity: 1;
+        max-height: 1000px;
+      }
+      100% {
+        border-color: rgba(251, 191, 36, 0.9);
+        box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+        transform: scale(0.92);
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+        border-width: 0;
       }
     }
 
@@ -372,6 +444,14 @@
 
     .tag:active {
       transform: scale(0.95);
+    }
+
+    .tag-clickable {
+      cursor: pointer;
+    }
+
+    .tag-clickable:hover {
+      filter: brightness(1.25);
     }
 
     .card-summary {
@@ -1373,6 +1453,24 @@
 
   <script>
     const ARTICLES = [
+  {
+    "title": "Rappaport on dividend reinvestment, price appreciation, and capital accumulation",
+    "url": "https://www.pm-research.com/content/iijpormgmt/32/3/119",
+    "platform": "Portfolio Management Research",
+    "author": "Alfred Rappaport",
+    "dateSent": "Apr 20, 2026",
+    "datePosted": "Apr 20, 2026",
+    "contentType": "Longform",
+    "category": "Markets & Research",
+    "tags": [
+      "Equity",
+      "Dividends",
+      "TSR",
+      "Capital Accumulation",
+      "Mauboussin"
+    ],
+    "summary": "Rappaport argues that price appreciation, not dividends, is the sole source of investment returns that increase accumulated capital. He shows that historical Total Shareholder Return figures overstate what real investors actually earn, because TSR assumes every dividend gets reinvested and no shares are ever sold (almost no one does that). Flags two common errors, using TSR as a proxy for capital accumulation and crediting dividends for long-run compounding, both of which can mislead portfolio return assumptions. Via @mjmauboussin on X."
+  },
   {
     "title": "Oil prices jump amid renewed tensions over the Strait of Hormuz",
     "url": "https://www.nbcnews.com/business/markets/oil-prices-jump-renewed-tensions-strait-hormuz-rcna340901",
@@ -3806,19 +3904,33 @@
     }
 
     function formatDateTime(article) {
-      let ts;
-      if (article.addedAt) ts = new Date(article.addedAt);
-      else ts = parseDate(article.dateSent);
-      if (!ts || isNaN(ts.getTime()) || ts.getTime() === 0) {
-        return '<span class="card-date-part">' + (article.dateSent || '') + '</span>';
+      // We show "Added: <date> <HH:MM AM/PM>" on each card.
+      // Time is pulled from whatever has precision: addedAt (ISO timestamp)
+      // or timeSent (a "HH:MM AM/PM" string the Gmail ingester can provide).
+      // If no time is available, we show the date alone.
+      let dateTs;
+      if (article.addedAt) dateTs = new Date(article.addedAt);
+      else dateTs = parseDate(article.dateSent);
+
+      let dateStr = '';
+      if (dateTs && !isNaN(dateTs.getTime()) && dateTs.getTime() !== 0) {
+        dateStr = dateTs.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } else {
+        dateStr = article.dateSent || '';
       }
-      const dateStr = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      // If we have a time component (only true for addedAt), show it
-      if (article.addedAt) {
-        const timeStr = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        return '<span class="card-date-part">' + dateStr + '</span> <span class="card-time">' + timeStr + '</span>';
+
+      let timeStr = '';
+      if (article.addedAt && dateTs && !isNaN(dateTs.getTime())) {
+        timeStr = dateTs.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      } else if (article.timeSent) {
+        timeStr = article.timeSent;
       }
-      return '<span class="card-date-part">' + dateStr + '</span>';
+
+      const prefix = '<span class="card-date-label">Added:</span> ';
+      if (timeStr) {
+        return prefix + '<span class="card-date-part">' + dateStr + '</span> <span class="card-time">' + timeStr + '</span>';
+      }
+      return prefix + '<span class="card-date-part">' + dateStr + '</span>';
     }
 
     function cardInnerHtml(idx, article, catColor) {
@@ -3831,7 +3943,7 @@
       ${article.category ? `<div class="card-category" style="background-color: ${catColor}22; color: ${catColor};">${article.category}</div>` : ''}
       <div class="card-title" onclick="openArticle(${idx})" style="cursor:pointer;">${article.title}</div>
       <div class="card-author">by ${article.author}</div>
-      <div class="card-tags">${article.tags.map(tag => `<span class="tag" style="background-color: ${catColor}22; color: ${catColor};">${tag}</span>`).join('')}</div>
+      <div class="card-tags">${article.tags.map(tag => `<span class="tag tag-clickable" style="background-color: ${catColor}22; color: ${catColor};" onclick="filterByTag(event, '${tag.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">${tag}</span>`).join('')}</div>
       <div class="card-summary">${article.summary}</div>
       <div class="card-footer">
         <div class="card-datetime">${dateTime}</div>
@@ -4058,6 +4170,24 @@
       render();
     }
 
+    function filterByTag(event, tag) {
+      // Invoked from a card tag chip. Adds the tag to the active filter set
+      // and switches to the home view so the filter is visible.
+      if (event) event.stopPropagation();
+      if (!tag) return;
+      activeTagFilters.add(tag);
+      // Make sure we're on the home feed where the filter applies
+      currentView = 'home';
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('homeView').classList.add('active');
+      updateViewModeIcon();
+      renderActiveFilters();
+      updateFilterBtnStates();
+      render();
+      showToast('Filtered by #' + tag);
+    }
+
     function clearTagFilters() {
       activeTagFilters.clear();
       document.getElementById('tagFilterModal').classList.remove('open');
@@ -4137,6 +4267,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
+        card.dataset.idx = idx;
         card.innerHTML = cardInnerHtml(idx, article, catColor);
         container.appendChild(card);
       });
@@ -4196,6 +4327,7 @@
         const catColor = CAT_COLORS[article.category] || '#5B9CF6';
         const card = document.createElement('div');
         card.className = 'card';
+        card.dataset.idx = idx;
         card.innerHTML = cardInnerHtml(idx, article, catColor);
         container.appendChild(card);
       });
@@ -4254,18 +4386,48 @@
       }
     }
 
+    function findCardEl(idx) {
+      return document.querySelector('.card[data-idx="' + idx + '"]');
+    }
+
     function archiveArticle(idx) {
-      saveState();
-      articles[idx].archived = true;
-      showToast('Archived. Ctrl+Z to undo');
-      render();
+      const cardEl = findCardEl(idx);
+      if (cardEl && !cardEl.classList.contains('card-archiving') && !cardEl.classList.contains('card-favoriting')) {
+        cardEl.classList.add('card-archiving');
+        setTimeout(() => {
+          saveState();
+          articles[idx].archived = true;
+          showToast('Archived. Ctrl+Z to undo');
+          render();
+        }, 400);
+      } else {
+        saveState();
+        articles[idx].archived = true;
+        showToast('Archived. Ctrl+Z to undo');
+        render();
+      }
     }
 
     function toggleLike(idx) {
-      saveState();
-      articles[idx].liked = !articles[idx].liked;
-      showToast(articles[idx].liked ? 'Saved' : 'Removed');
-      render();
+      // If the user is favoriting from the home feed (item will leave the feed),
+      // play the gold-trim animation before re-rendering. Otherwise just toggle.
+      const goingToLiked = !articles[idx].liked;
+      const inHomeView = currentView === 'home';
+      const cardEl = findCardEl(idx);
+      if (goingToLiked && inHomeView && cardEl && !cardEl.classList.contains('card-favoriting') && !cardEl.classList.contains('card-archiving')) {
+        cardEl.classList.add('card-favoriting');
+        setTimeout(() => {
+          saveState();
+          articles[idx].liked = true;
+          showToast('Saved');
+          render();
+        }, 550);
+      } else {
+        saveState();
+        articles[idx].liked = !articles[idx].liked;
+        showToast(articles[idx].liked ? 'Saved' : 'Removed');
+        render();
+      }
     }
 
     function openTagModal(idx) {
