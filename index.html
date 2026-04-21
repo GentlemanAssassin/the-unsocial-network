@@ -245,48 +245,49 @@
     }
 
     /* List view styles */
-    .cards-container.list-view .card {
-      padding: 10px 12px;
-    }
-
-    .cards-container.list-view .card-summary {
-      display: none;
-    }
-
-    .cards-container.list-view .card-title {
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .cards-container.list-view .card-author {
-      font-size: 12px;
-      margin-bottom: 6px;
-    }
-
-    .cards-container.list-view .card-tags {
-      margin-bottom: 6px;
-    }
-
+    .cards-container.list-view .card,
     .saved-container.list-view .card {
       padding: 10px 12px;
     }
 
+    .cards-container.list-view .card-summary,
     .saved-container.list-view .card-summary {
       display: none;
     }
 
+    .cards-container.list-view .card-title,
     .saved-container.list-view .card-title {
       font-size: 15px;
       margin-bottom: 6px;
     }
 
+    .cards-container.list-view .card-author,
     .saved-container.list-view .card-author {
       font-size: 12px;
       margin-bottom: 6px;
     }
 
+    /* List view: keep tags on a single row; overflow is clipped. */
+    .cards-container.list-view .card-tags,
     .saved-container.list-view .card-tags {
       margin-bottom: 6px;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .cards-container.list-view .card-tags .tag,
+    .saved-container.list-view .card-tags .tag {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* List view: collapse all top-right and footer buttons into a single menu button. */
+    .cards-container.list-view .card-edit-btn,
+    .saved-container.list-view .card-edit-btn,
+    .cards-container.list-view .card-footer-actions .action-btn.list-hide,
+    .saved-container.list-view .card-footer-actions .action-btn.list-hide {
+      display: none;
     }
 
     @keyframes cardEnter {
@@ -1298,6 +1299,7 @@
           <button class="sort-btn" id="typeFilterBtn" onclick="openTypeFilterModal()">Type</button>
           <button class="sort-btn" id="categoryFilterBtn" onclick="openCategoryFilterModal()">Category</button>
           <button class="sort-btn" id="tagFilterSortBtn" onclick="openTagFilterModal()">Tags</button>
+          <button class="sort-btn" onclick="exportCurrentView()" title="Export visible cards as CSV"><i class="ph ph-download-simple" style="font-size: 13px; vertical-align: middle;"></i></button>
           <button class="sort-btn" onclick="location.reload()" title="Refresh">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
           </button>
@@ -1313,6 +1315,7 @@
         <div class="sort-controls">
           <button class="sort-btn active" id="archiveAllBtn" onclick="setArchiveFilter('all')">All</button>
           <button class="sort-btn" id="archiveFavBtn" onclick="setArchiveFilter('favorites')"><i class="ph-fill ph-star" style="font-size: 12px; vertical-align: middle; color: #FBBF24;"></i> Favorites</button>
+          <button class="sort-btn" onclick="exportCurrentView()" title="Export visible cards as CSV"><i class="ph ph-download-simple" style="font-size: 13px; vertical-align: middle;"></i></button>
         </div>
         <div class="saved-container" id="savedContainer"></div>
       </div>
@@ -3945,6 +3948,26 @@
       "Columbia Business School"
     ],
     "summary": "Tomasz Piskorski (Columbia Business School, Edward S. Gordon Professor of Real Estate) argues in this MarketWatch op-ed that private credit is structurally less fragile than traditional banking. Private credit funds have locked-up capital rather than overnight demand deposits, so they don't face the run dynamic that turns bank stress into systemic crisis. Leverage is lower, losses are absorbed by sophisticated institutional investors rather than insured depositors, and the sector operates with informed pricing of risk. Piskorski's conclusion is that private credit's rise has probably made the financial system more stable on net, not less."
+  },
+  {
+    "title": "Upslope Capital Q1 2026 investor letter",
+    "url": "https://www.upslopecapital.com/s/Upslope-2026Q1-Letter.pdf",
+    "platform": "Upslope Capital",
+    "author": "Upslope Capital",
+    "dateSent": "Apr 21, 2026",
+    "datePosted": "Apr 21, 2026",
+    "addedAt": "2026-04-21T18:33:43Z",
+    "timeSent": "11:30 AM",
+    "contentType": "Longform",
+    "category": "Markets & Research",
+    "tags": [
+      "Newsletter",
+      "Hedge Fund Letter",
+      "Q1 2026",
+      "Long/Short",
+      "Upslope Capital"
+    ],
+    "summary": "Upslope Capital's Q1 2026 quarterly letter to investors, posted by the firm directly to X. Covers the long/short small-cap manager's quarterly performance, current positioning, and market commentary. Full text lives in the PDF on Upslope's site. Via @UpslopeCapital on X."
   }
 ];
 
@@ -4039,8 +4062,8 @@
       <div class="card-footer">
         <div class="card-datetime">${dateTime}</div>
         <div class="card-footer-actions">
-          <button class="action-btn ${article.liked ? 'liked' : ''}" onclick="toggleLike(${idx})" title="${article.liked ? 'Unfavorite' : 'Favorite'}"><i class="ph ${article.liked ? 'ph-fill' : ''} ph-star"></i></button>
-          <button class="action-btn" onclick="archiveArticle(${idx})" title="Archive"><i class="ph ph-archive"></i></button>
+          <button class="action-btn list-hide ${article.liked ? 'liked' : ''}" onclick="toggleLike(${idx})" title="${article.liked ? 'Unfavorite' : 'Favorite'}"><i class="ph ${article.liked ? 'ph-fill' : ''} ph-star"></i></button>
+          <button class="action-btn list-hide" onclick="archiveArticle(${idx})" title="Archive"><i class="ph ph-archive"></i></button>
           <button class="action-btn" onclick="showOptionsMenu(event, ${idx})" title="Menu"><i class="ph ph-dots-three-circle"></i></button>
         </div>
       </div>`;
@@ -4447,6 +4470,88 @@
       render();
     }
 
+    function csvEscape(val) {
+      if (val === null || val === undefined) return '';
+      const s = String(val);
+      if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }
+
+    function slugifyForFilename(s) {
+      return String(s).replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+    }
+
+    function exportCurrentView() {
+      let indices = [];
+      let prefix = 'view';
+      if (currentView === 'home') {
+        indices = getSortedIndices(currentSort);
+        prefix = 'home';
+      } else if (currentView === 'saved') {
+        let items;
+        if (archiveFilter === 'favorites') {
+          items = articles.map((a, i) => i).filter(i => articles[i].liked);
+          prefix = 'favorites';
+        } else {
+          items = articles.map((a, i) => i).filter(i => articles[i].archived || articles[i].liked);
+          prefix = 'archive';
+        }
+        items.sort((a, b) => parseDate(articles[b].dateSent) - parseDate(articles[a].dateSent));
+        indices = items;
+      } else {
+        showToast('Export not available in this view');
+        return;
+      }
+      if (indices.length === 0) {
+        showToast('Nothing to export');
+        return;
+      }
+      const headers = ['title', 'url', 'platform', 'author', 'contentType', 'category', 'tags', 'dateSent', 'timeSent', 'datePosted', 'addedAt', 'summary', 'archived', 'liked'];
+      const rows = [headers];
+      indices.forEach(i => {
+        const a = articles[i];
+        rows.push([
+          a.title || '',
+          a.url || '',
+          a.platform || '',
+          a.author || '',
+          a.contentType || '',
+          a.category || '',
+          (a.tags || []).join('; '),
+          a.dateSent || '',
+          a.timeSent || '',
+          a.datePosted || '',
+          a.addedAt || '',
+          a.summary || '',
+          a.archived ? 'yes' : 'no',
+          a.liked ? 'yes' : 'no'
+        ]);
+      });
+      const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+      // Build a filename suffix from whatever filter the user currently has active,
+      // so "AresMemo tag selected -> download" produces a descriptively named file.
+      let suffixParts = [];
+      if (activeTagFilters && activeTagFilters.size > 0) suffixParts = Array.from(activeTagFilters);
+      else if (activeCategoryFilters && activeCategoryFilters.size > 0) suffixParts = Array.from(activeCategoryFilters);
+      else if (activeTypeFilters && activeTypeFilters.size > 0) suffixParts = Array.from(activeTypeFilters);
+      else if (searchTags && searchTags.length > 0) suffixParts = searchTags.slice();
+      else if (searchQuery) suffixParts = [searchQuery];
+      const suffix = suffixParts.length ? '-' + suffixParts.map(slugifyForFilename).filter(Boolean).join('_') : '';
+      const stamp = new Date().toISOString().slice(0, 10);
+      const fname = `unsocial-${prefix}${suffix}-${stamp}.csv`;
+      // Prepend BOM so Excel opens UTF-8 correctly.
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fname;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Exported ' + indices.length + (indices.length === 1 ? ' item' : ' items'));
+    }
+
     function updateViewModeIcon() {
       const icon = document.getElementById('viewModeIcon');
       if (!icon) return;
@@ -4557,7 +4662,19 @@
       menu.style.position = 'fixed';
       menu.style.top = event.clientY + 'px';
       menu.style.left = Math.min(event.clientX, window.innerWidth - 200) + 'px';
-      menu.innerHTML = `<button class="menu-item" onclick="shareArticle(${idx}); this.parentElement.remove();">Share</button><button class="menu-item" onclick="deleteArticle(${idx}); this.parentElement.remove();">Delete</button>`;
+      // In list view, collapse every card button (edit, favorite, archive) into this menu too.
+      const article = articles[idx];
+      let items = '';
+      if (listViewMode) {
+        items += `<button class="menu-item" onclick="openEditPost(${idx}); this.parentElement.remove();">Edit</button>`;
+        items += `<button class="menu-item" onclick="toggleLike(${idx}); this.parentElement.remove();">${article.liked ? 'Unfavorite' : 'Favorite'}</button>`;
+        if (!article.archived) {
+          items += `<button class="menu-item" onclick="archiveArticle(${idx}); this.parentElement.remove();">Archive</button>`;
+        }
+      }
+      items += `<button class="menu-item" onclick="shareArticle(${idx}); this.parentElement.remove();">Share</button>`;
+      items += `<button class="menu-item" onclick="deleteArticle(${idx}); this.parentElement.remove();">Delete</button>`;
+      menu.innerHTML = items;
       document.body.appendChild(menu);
       const closeOnOutside = (e) => {
         if (!menu.contains(e.target)) {
