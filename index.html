@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>The UNsocialnet.work</title>
+  <title>UNsocialnet.work</title>
   <link rel="icon" type="image/x-icon" href="Favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="Favicon.ico">
   <link rel="apple-touch-icon" href="icon.png">
@@ -302,7 +302,7 @@
 
     /* Archive exit — card slides right and down */
     .card.card-archiving {
-      animation: cardArchive 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      animation: cardArchive 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
       pointer-events: none;
     }
 
@@ -330,7 +330,7 @@
 
     /* Favorite exit — gold trim pulse, then slide right and down */
     .card.card-favoriting {
-      animation: cardFavoriteTrim 0.55s ease-out forwards;
+      animation: cardFavoriteTrim 0.825s ease-out forwards;
       pointer-events: none;
     }
 
@@ -367,7 +367,7 @@
 
     /* Delete exit — card slides left and down */
     .card.card-deleting {
-      animation: cardDelete 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      animation: cardDelete 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
       pointer-events: none;
     }
 
@@ -1001,6 +1001,13 @@
       text-align: center;
     }
 
+    .toast.toast-large {
+      font-size: 22px;
+      font-weight: 600;
+      padding: 18px 28px;
+      letter-spacing: 0.3px;
+    }
+
     input[type="text"],
     textarea {
       background: rgba(91, 156, 246, 0.05);
@@ -1267,7 +1274,7 @@
     <header>
       <div class="header-left">
         <img src="logo.png" alt="" class="header-logo">
-        <div class="header-title">The UNsocialnet.work</div>
+        <div class="header-title">UNsocialnet.work</div>
       </div>
       <div class="header-actions">
         <button class="header-btn" id="searchBtn" title="Search"><i class="ph-fill ph-magnifying-glass"></i></button>
@@ -4140,9 +4147,9 @@
       }
     }
 
-    function showToast(message) {
+    function showToast(message, options) {
       const toast = document.createElement('div');
-      toast.className = 'toast';
+      toast.className = 'toast' + (options && options.large ? ' toast-large' : '');
       toast.textContent = message;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
@@ -4481,13 +4488,13 @@
         setTimeout(() => {
           saveState();
           articles[idx].archived = true;
-          showToast('Archived');
+          showToast('Archived', { large: true });
           render();
-        }, 400);
+        }, 600);
       } else {
         saveState();
         articles[idx].archived = true;
-        showToast('Archived');
+        showToast('Archived', { large: true });
         render();
       }
     }
@@ -4503,13 +4510,13 @@
         setTimeout(() => {
           saveState();
           articles[idx].liked = true;
-          showToast('Saved');
+          showToast('Favorited', { large: true });
           render();
-        }, 550);
+        }, 825);
       } else {
         saveState();
         articles[idx].liked = !articles[idx].liked;
-        showToast(articles[idx].liked ? 'Saved' : 'Removed');
+        showToast(articles[idx].liked ? 'Favorited' : 'Removed', articles[idx].liked ? { large: true } : undefined);
         render();
       }
     }
@@ -4642,7 +4649,7 @@
           articles.splice(idx, 1);
           showToast('Deleted');
           render();
-        }, 400);
+        }, 600);
       } else {
         saveState();
         articles.splice(idx, 1);
