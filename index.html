@@ -300,7 +300,7 @@
       }
     }
 
-    /* Archive exit — card slides to the left toward the archive button */
+    /* Archive exit — card slides right and down */
     .card.card-archiving {
       animation: cardArchive 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
       pointer-events: none;
@@ -309,17 +309,17 @@
     @keyframes cardArchive {
       0% {
         opacity: 1;
-        transform: translateX(0) scale(1);
+        transform: translate(0, 0) scale(1);
         max-height: 1000px;
       }
       60% {
         opacity: 0;
-        transform: translateX(-110%) scale(0.85);
+        transform: translate(110%, 60%) scale(0.85);
         max-height: 1000px;
       }
       100% {
         opacity: 0;
-        transform: translateX(-110%) scale(0.85);
+        transform: translate(110%, 60%) scale(0.85);
         max-height: 0;
         padding-top: 0;
         padding-bottom: 0;
@@ -328,7 +328,7 @@
       }
     }
 
-    /* Favorite exit — gold trim pulse, then shrink out */
+    /* Favorite exit — gold trim pulse, then slide right and down */
     .card.card-favoriting {
       animation: cardFavoriteTrim 0.55s ease-out forwards;
       pointer-events: none;
@@ -338,25 +338,53 @@
       0% {
         border-color: rgba(91, 156, 246, 0.1);
         box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
-        transform: scale(1);
+        transform: translate(0, 0) scale(1);
       }
       35% {
         border-color: rgba(251, 191, 36, 0.9);
         box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.55), 0 0 22px 2px rgba(251, 191, 36, 0.35);
-        transform: scale(1.015);
+        transform: translate(0, 0) scale(1.015);
       }
       70% {
         border-color: rgba(251, 191, 36, 0.9);
         box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.45), 0 0 18px 2px rgba(251, 191, 36, 0.3);
-        transform: scale(1);
+        transform: translate(0, 0) scale(1);
         opacity: 1;
         max-height: 1000px;
       }
       100% {
         border-color: rgba(251, 191, 36, 0.9);
         box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
-        transform: scale(0.92);
+        transform: translate(110%, 60%) scale(0.9);
         opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+        border-width: 0;
+      }
+    }
+
+    /* Delete exit — card slides left and down */
+    .card.card-deleting {
+      animation: cardDelete 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes cardDelete {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+        max-height: 1000px;
+      }
+      60% {
+        opacity: 0;
+        transform: translate(-110%, 60%) scale(0.85);
+        max-height: 1000px;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-110%, 60%) scale(0.85);
         max-height: 0;
         padding-top: 0;
         padding-bottom: 0;
@@ -4448,18 +4476,18 @@
 
     function archiveArticle(idx) {
       const cardEl = findCardEl(idx);
-      if (cardEl && !cardEl.classList.contains('card-archiving') && !cardEl.classList.contains('card-favoriting')) {
+      if (cardEl && !cardEl.classList.contains('card-archiving') && !cardEl.classList.contains('card-favoriting') && !cardEl.classList.contains('card-deleting')) {
         cardEl.classList.add('card-archiving');
         setTimeout(() => {
           saveState();
           articles[idx].archived = true;
-          showToast('Archived. Ctrl+Z to undo');
+          showToast('Archived');
           render();
         }, 400);
       } else {
         saveState();
         articles[idx].archived = true;
-        showToast('Archived. Ctrl+Z to undo');
+        showToast('Archived');
         render();
       }
     }
@@ -4470,7 +4498,7 @@
       const goingToLiked = !articles[idx].liked;
       const inHomeView = currentView === 'home';
       const cardEl = findCardEl(idx);
-      if (goingToLiked && inHomeView && cardEl && !cardEl.classList.contains('card-favoriting') && !cardEl.classList.contains('card-archiving')) {
+      if (goingToLiked && inHomeView && cardEl && !cardEl.classList.contains('card-favoriting') && !cardEl.classList.contains('card-archiving') && !cardEl.classList.contains('card-deleting')) {
         cardEl.classList.add('card-favoriting');
         setTimeout(() => {
           saveState();
@@ -4606,10 +4634,21 @@
     }
 
     function deleteArticle(idx) {
-      saveState();
-      articles.splice(idx, 1);
-      showToast('Deleted');
-      render();
+      const cardEl = findCardEl(idx);
+      if (cardEl && !cardEl.classList.contains('card-archiving') && !cardEl.classList.contains('card-favoriting') && !cardEl.classList.contains('card-deleting')) {
+        cardEl.classList.add('card-deleting');
+        setTimeout(() => {
+          saveState();
+          articles.splice(idx, 1);
+          showToast('Deleted');
+          render();
+        }, 400);
+      } else {
+        saveState();
+        articles.splice(idx, 1);
+        showToast('Deleted');
+        render();
+      }
     }
 
     function feedCardPointerDown(e) {
