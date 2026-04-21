@@ -128,8 +128,24 @@
       padding: 12px 16px;
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
       border-bottom: 1px solid rgba(91, 156, 246, 0.1);
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      background: #0A0C10;
+      z-index: 5;
+    }
+
+    .sort-controls::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sort-controls .sort-btn {
       flex-shrink: 0;
     }
 
@@ -1484,7 +1500,6 @@
       </div>
       <div class="modal-buttons">
         <button class="modal-btn secondary" id="clearTagFilters">Clear All</button>
-        <button class="modal-btn primary" id="applyTagFilters">Apply</button>
       </div>
     </div>
   </div>
@@ -5005,7 +5020,6 @@
       document.getElementById('tagFilterModal').classList.remove('open');
     });
     document.getElementById('clearTagFilters').addEventListener('click', clearTagFilters);
-    document.getElementById('applyTagFilters').addEventListener('click', applyTagFilters);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
