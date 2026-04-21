@@ -54,23 +54,31 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
+      flex: 1 1 auto;
     }
 
     .header-logo {
       width: 72px;
       height: 72px;
       object-fit: contain;
+      flex-shrink: 0;
     }
 
     .header-title {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.3px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .header-actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .header-btn {
@@ -86,6 +94,7 @@
       font-size: 20px;
       transition: all 0.2s ease;
       color: #FFFFFF;
+      flex-shrink: 0;
     }
 
     .header-btn i {
@@ -1295,6 +1304,7 @@
       </div>
       <div class="header-actions">
         <button class="header-btn" id="searchBtn" title="Search"><i class="ph-fill ph-magnifying-glass"></i></button>
+        <button class="header-btn" id="exportBtn" onclick="exportCurrentView()" title="Export current view as CSV"><i class="ph ph-download-simple"></i></button>
         <button class="header-btn" id="addBtn" title="Add Content"><i class="ph ph-plus"></i></button>
       </div>
     </header>
@@ -1315,7 +1325,6 @@
           <button class="sort-btn" id="typeFilterBtn" onclick="openTypeFilterModal()">Type</button>
           <button class="sort-btn" id="categoryFilterBtn" onclick="openCategoryFilterModal()">Category</button>
           <button class="sort-btn" id="tagFilterSortBtn" onclick="openTagFilterModal()">Tags</button>
-          <button class="sort-btn" onclick="exportCurrentView()" title="Export visible cards as CSV"><i class="ph ph-download-simple" style="font-size: 13px; vertical-align: middle;"></i></button>
           <button class="sort-btn" onclick="location.reload()" title="Refresh">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
           </button>
@@ -1331,7 +1340,6 @@
         <div class="sort-controls">
           <button class="sort-btn active" id="archiveAllBtn" onclick="setArchiveFilter('all')">All</button>
           <button class="sort-btn" id="archiveFavBtn" onclick="setArchiveFilter('favorites')"><i class="ph-fill ph-star" style="font-size: 12px; vertical-align: middle; color: #FBBF24;"></i> Favorites</button>
-          <button class="sort-btn" onclick="exportCurrentView()" title="Export visible cards as CSV"><i class="ph ph-download-simple" style="font-size: 13px; vertical-align: middle;"></i></button>
         </div>
         <div class="saved-container" id="savedContainer"></div>
       </div>
